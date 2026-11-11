@@ -1,4 +1,4 @@
-# Drum rudiments for rudiment_generator.py
+# Drum rudiments for my_rudiments.py
 #
 # Each example starts with its name in square brackets, followed by key: value lines.
 #

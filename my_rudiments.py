@@ -372,7 +372,7 @@ def render_audio(chains, levels, passes, click, tmpdir):
                              count_beat=beat0,
                              end=(pos + int(total * SR)) / SR, passes=passes))
         pos += int(total * SR)
-        print(f"{label:70s} {passes * sum(p['length'] for p in parts) / 4:.0f} bars", file=sys.stderr)
+        print(f"{label:70s} {passes * sum(p['length'] / p['ex'].beats_per_bar for p in parts):.0f} bars", file=sys.stderr)
     if os.path.exists(tmp):
         os.remove(tmp)
     audio = np.concatenate(segs)
@@ -381,9 +381,8 @@ def render_audio(chains, levels, passes, click, tmpdir):
     return (audio * 32767).astype(np.int16), timeline
 
 def render_audio_continuous(chains, levels, passes, click, tmpdir):
-    """Everything back to back: one count-in at the start, then each take straight after
-    the previous one, with its name spoken over its first bars (drums dip under the voice)."""
-    tmp = os.path.join(tmpdir, "_tts.wav")
+    """Everything back to back, no voice: one count-in at the start, then each take
+    straight after the previous one."""
     takes = []
     for chain in chains:
         parts = []
@@ -397,15 +396,11 @@ def render_audio_continuous(chains, levels, passes, click, tmpdir):
     play0 = count + 4 * beat0
     total = play0 + sum(passes * p["length"] * p["beat"] for _, ps in takes for p in ps) + 2.0
     drums = np.zeros((int(total * SR) + SR, 2))
-    voice = np.zeros(len(drums))
     for b in range(4):
         place(drums, CLICK_HI if b == 0 else CLICK_LO, count + b * beat0, 0.35, 0)
     timeline, ps = [], play0
     for n, (label, parts) in enumerate(takes):
         take_start = ps
-        v = tts(spoken(label), tmp)
-        i = int(round(take_start * SR))
-        voice[i:i + len(v)] += v[: len(voice) - i]
         for part in parts:
             part["start"] = ps
             bpb, beat = part["ex"].beats_per_bar, part["beat"]
@@ -418,17 +413,9 @@ def render_audio_continuous(chains, levels, passes, click, tmpdir):
         timeline.append(dict(label=label, parts=parts, passes=passes,
                              count=count if n == 0 else take_start, count_beat=beat0,
                              play=take_start, end=ps))
-        print(f"{label:70s} {passes * sum(p['length'] for p in parts) / 4:.0f} bars", file=sys.stderr)
+        print(f"{label:70s} {passes * sum(p['length'] / p['ex'].beats_per_bar for p in parts):.0f} bars", file=sys.stderr)
     timeline[-1]["end"] = total
-    if os.path.exists(tmp):
-        os.remove(tmp)
-    # duck the drums while the voice speaks, so the name stays clear
-    k = int(0.08 * SR)
-    env = np.convolve(np.abs(voice), np.ones(k) / k, "same")
-    duck = 1.0 - 0.55 * np.clip(env / 0.05, 0, 1)
-    dmax = np.max(np.abs(drums)) + 1e-9
-    audio = drums / dmax * 0.75 * duck[:, None] + voice[:, None] * 0.95
-    audio = audio[: int(total * SR)]
+    audio = drums[: int(total * SR)]
     audio /= np.max(np.abs(audio)) * 1.12
     print(f"{len(timeline)} takes, {len(audio) / SR / 60:.1f} min, no pauses", file=sys.stderr)
     return (audio * 32767).astype(np.int16), timeline
@@ -1050,12 +1037,12 @@ def cli():
         description="Make drum rudiment practice audio, a PDF sheet and a notation video "
                     "from the patterns in a rudiments file.",
         epilog="Examples:\n"
-               "  python3 rudiment_generator.py practice.mp3\n"
-               "  python3 rudiment_generator.py --sheet rudiments.pdf --levels 1,2,3\n"
-               "  python3 rudiment_generator.py practice.mp3 --video practice.mp4 --levels 1,2,3 --seamless\n"
-               "  python3 rudiment_generator.py --rudiments mine.txt --only 41 --video mine.mp4\n"
-               "  python3 rudiment_generator.py practice.mp3 --video practice.mp4 --pdf 40rudiments.pdf\n"
-               "  python3 rudiment_generator.py nonstop.mp3 --continuous --passes 1",
+               "  python3 my_rudiments.py practice.mp3\n"
+               "  python3 my_rudiments.py --sheet rudiments.pdf --levels 1,2,3\n"
+               "  python3 my_rudiments.py practice.mp3 --video practice.mp4 --levels 1,2,3 --seamless\n"
+               "  python3 my_rudiments.py --rudiments mine.txt --only 41 --video mine.mp4\n"
+               "  python3 my_rudiments.py practice.mp3 --video practice.mp4 --pdf 40rudiments.pdf\n"
+               "  python3 my_rudiments.py nonstop.mp3 --continuous --passes 1",
         formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("output", nargs="?",
                    help="audio file to write; .mp3 is encoded with ffmpeg, anything else is WAV "
@@ -1081,8 +1068,8 @@ def cli():
                    help="play a rudiment's levels back to back with no pause: one spoken name "
                         "and count-in, then each level in turn (each played --passes times)")
     p.add_argument("--continuous", action="store_true",
-                   help="no pauses: one count-in, then every rudiment straight after the "
-                        "previous one, with its name spoken over its first bars")
+                   help="no pauses and no voice: one count-in, then every rudiment straight "
+                        "after the previous one (the video still shows each name)")
     p.add_argument("--bpm", type=float, default=None,
                    help="tempo for everything, overriding any bpm in the rudiments file "
                         f"(default: the file's bpm, else {DEFAULT_BPM})")
