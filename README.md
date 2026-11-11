@@ -8,7 +8,7 @@ Python script to generate custom drum rudiment play-along audio, videos and prac
 - **A PDF practice sheet** with the notation and sticking.
 - **A video** of the notation with a cursor that follows the audio note by note.
 
-The included `rudiments.txt` has all 76 Level 1, 2 and 3 examples from *The 40 Rudiments Plain and Simple*. You can edit those or add your own.
+The included `rudiments.txt` comes with 76 rudiment examples at Levels 1, 2 and 3. You can edit those or add your own.
 
 ---
 
@@ -31,7 +31,6 @@ You also need two programs:
 
 Keep `my_rudiments.py` and `rudiments.txt` in the same folder.
 
-To show the book's own notation in videos, put `40rudiments.pdf` in that folder too (see [Using the book's PDF](#using-the-books-pdf)).
 
 ---
 
@@ -74,7 +73,7 @@ python3 my_rudiments.py diddles.mp3 --only 16,17,18 --passes 4 --no-click
 # Exaggerated accents: unaccented strokes very quiet
 python3 my_rudiments.py accents.mp3 --tap 0.08
 
-# Play straight through with no pauses and no voice, like reading the book top to bottom
+# Play straight through with no pauses and no voice, top to bottom
 python3 my_rudiments.py nonstop.mp3 --continuous --passes 1
 ```
 
@@ -99,11 +98,8 @@ python3 my_rudiments.py practice.mp3 --video practice.mp4
 # Video only, all levels, seamless, at 80 bpm with each example played 4 times
 python3 my_rudiments.py --video practice-80bpm.mp4 --levels 1,2,3 --seamless --bpm 80 --passes 4
 
-# Use the book's own notation (if the PDF isn't next to the script)
-python3 my_rudiments.py --video practice.mp4 --pdf ~/Downloads/40rudiments.pdf
-
-# Always use drawn notation, even if the book PDF is found
-python3 my_rudiments.py --video practice.mp4 --no-pdf
+# Show the notation from a PDF you have, instead of drawn notation
+python3 my_rudiments.py --video practice.mp4 --pdf ~/Documents/my-rudiment-notation.pdf
 
 # Everything at once
 python3 my_rudiments.py practice.mp3 --sheet practice.pdf --video practice.mp4 --levels 1,2,3
@@ -142,8 +138,7 @@ The Enhanced and Premium voices sound much more natural. To download one, open S
 | `--rudiments FILE` | Pattern file to read | `rudiments.txt` next to the script |
 | `--sheet OUT.pdf` | Write a PDF practice sheet | |
 | `--video OUT.mp4` | Write a notation video with a moving cursor | |
-| `--pdf FILE` | Book PDF to take notation images from, for the video | `40rudiments.pdf`, if found |
-| `--no-pdf` | Always draw the notation, even if the book PDF is found | |
+| `--pdf FILE` | A PDF of rudiment notation to show in the video instead of drawn notation | drawn notation |
 | `--levels LIST` | Levels to include, e.g. `1`, `1,2`, `2,3`, `1,2,3` | `1,2` |
 | `--only LIST` | Only these rudiments: numbers and/or parts of names, e.g. `16,19` or `paradiddle` | all |
 | `--seamless` | Play a rudiment's levels back to back with no pause: one spoken name and count-in, then each level | off |
@@ -157,7 +152,7 @@ The Enhanced and Premium voices sound much more natural. To download one, open S
 
 Some notes on how the options work:
 
-- **Repeat signs:** an example written between repeat signs plays twice per pass, as in the book.
+- **Repeat signs:** an example written between repeat signs plays twice per pass.
 - **`--seamless`:** levels of the same rudiment are joined only when they appear in order (Level 1, then 2, then 3) under the same number.
 - **`--continuous`:** the video still shows each rudiment's name, and the score switches the moment the next rudiment starts.
 
@@ -177,11 +172,11 @@ pattern: |: @4 R> L R R L> R L L R> L R R L> R L L :|
 | Key | Meaning |
 |---|---|
 | `[Name]` | The rudiment's name, as spoken and printed. |
-| `number:` | Optional. The rudiment's number; used for the spoken name, `--only`, `--seamless`, and finding it in the book PDF. |
+| `number:` | Optional. The rudiment's number; used for the spoken name, `--only`, `--seamless`, and finding it in a `--pdf` file. |
 | `level:` | `1`, `2` or `3`, or a list like `2,3`. Default `1`. |
 | `time:` | Optional. Beats per bar over 4, e.g. `3/4`. Default `4/4`. |
 | `bpm:` | Optional. Tempo for this example only. |
-| `pdf:` | Optional and rarely needed; see [Using the book's PDF](#using-the-books-pdf). |
+| `pdf:` | Optional and rarely needed; see [Using notation from a PDF](#using-notation-from-a-pdf). |
 | `pattern:` | The notes. Long patterns can continue on the following lines if those lines are indented. |
 
 Lines starting with `#` are comments.
@@ -281,15 +276,24 @@ Entries without a `number:` are spoken by name only ("Waltz singles. Level 1.").
 
 ---
 
-## Using the book's PDF
+## Using notation from a PDF
 
-By default, the video shows notation drawn by the program.
+By default, the video shows notation drawn by the program. If you have a PDF of rudiment notation, you can point to it with `--pdf` and the video will show that PDF's notation instead, cropped from its pages, with the cursor following the notes.
 
-If `40rudiments.pdf` (*The 40 Rudiments Plain and Simple*) is in the current folder or next to the script, or you point to it with `--pdf`, the video shows the book's own notation instead. Each example is found automatically by its number and level, from the headings in the book.
+```bash
+python3 my_rudiments.py --video practice.mp4 --pdf my-notation.pdf
+```
 
-- **Not in the book:** rudiments that aren't in the book (your own ones, for example) still get drawn notation, in the same video.
+This works with a PDF laid out like a typical rudiment sheet:
+
+- **Headings are real text**, not a scanned image, with the number, name and level, like `16. Single Paradiddle Level 1`. Headings that say only `Level 2` (or, say, `Off the left hand Level 2`) belong to the rudiment above them.
+- **Each heading sits above its music**, on five-line staves with one note per stroke. An example can run over several lines, down to the next heading.
+- **Two examples can share a line**, side by side, each with its own heading above it.
+
+Each example in `rudiments.txt` is matched to a heading by its `number:` and `level:`, and its notes are matched to the noteheads on the page.
+
+- **No match:** an example that isn't found in the PDF, or whose note count doesn't match the page, gets drawn notation instead, in the same video. The script prints a note saying which ones.
 - **The sheet:** `--sheet` always uses drawn notation.
-- **Turning it off:** `--no-pdf` turns the book notation off.
 
 You rarely need a `pdf:` line in an entry. Use one only to point an example somewhere specific:
 
@@ -312,4 +316,4 @@ pdf: skip 13,30                # ignore noteheads 13 and 30 (e.g. tied notes tha
 - **`ffmpeg not found`:** install ffmpeg (see [Setup](#setup)). Until you do, MP3 output is left as a WAV file, and the script tells you where it is.
 - **`No text-to-speech found`:** on Linux, install `espeak-ng`.
 - **An error naming a line in `rudiments.txt`:** the message gives the file, line, rudiment and the problem. For example, `can't read 'X' in the pattern` or `pattern is 5 beats long, which isn't a whole number of 4-beat bars`.
-- **A note says the PDF couldn't be used for an example:** the script couldn't match that example's notes to the book. It draws the notation for that example instead, and everything else is unaffected.
+- **A note says the PDF couldn't be used for an example:** the script couldn't match that example's notes to the PDF. It draws the notation for that example instead, and everything else is unaffected.

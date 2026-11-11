@@ -7,7 +7,7 @@
 #   level: 1          1, 2 or 3 (or a list like 2,3); default 1
 #   time: 4/4         optional; beats per bar over 4 (default 4/4)
 #   bpm: 80           optional; tempo for this example (default: the file-wide bpm below)
-#   pdf: ...          optional, rarely needed. With --pdf, examples are found in the book by
+#   pdf: ...          optional, rarely needed. With --pdf, examples are found in the PDF by
 #                     their number and level. Use this to point somewhere else, e.g.
 #                     'pdf: page 3, line 2' ('lines 4-5' for two lines, 'part 2' for the right-
 #                     hand example on a shared line), or 'pdf: skip 13,30' to ignore noteheads
@@ -70,7 +70,7 @@ pattern: |: @6 R L R @2 L @6 L R L @2 R @6 R L R @2 L @6 L R L @2 R :|
 [Single stroke four]
 number: 2
 level: 2,3
-pdf: skip 13,30          # two tied notes in the book that aren't struck
+pdf: skip 13,30          # with --pdf: two tied notes that aren't struck
 pattern: @12 R L R @2 L @12 L R L @2 R @12 R L R @2 L @12 L R L @2 R @12 R L R @2 L @12 L R L |
          @2 R @12 R L R @2 L @12 L R L @2 R @12 R L R @2 L @12 L R L @2 R .
 

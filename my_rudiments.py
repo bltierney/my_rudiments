@@ -69,7 +69,7 @@ def load_rudiments(path):
         except (ValueError, AssertionError):
             raise ValueError(f"bpm must be a number between 10 and 400, got {v!r}")
     def read_book(v):
-        """Optional override of where an example is in the book PDF, e.g.
+        """Optional override of where an example is in the --pdf file, e.g.
         'page 3, line 2', 'page 10, lines 4-5', 'page 9, line 5, part 2', 'skip 13,30'."""
         out, parts = {}, [p.strip() for p in v.split(",")]
         i = 0
@@ -696,7 +696,7 @@ def _compose(ex, fonts):
         geo[i] = (cx, int(cy - 3.2 * sp), int(cy + 3.6 * sp))
     return frame, geo, max(5, int(0.55 * sp))
 
-# ----- the book's own notation (when its PDF is available) -----
+# ----- notation taken from a PDF (--pdf) -----
 DPI = 250
 
 def _book_staves(g):
@@ -743,7 +743,7 @@ def _norm(t):
     return re.sub(r"[^a-z0-9]+", " ", t.lower()).strip()
 
 def _book_headings(doc):
-    """Every heading in the book ('16. Single Paradiddle Level 1', 'Level 2', ...) with its
+    """Every heading in the PDF ('16. Single Paradiddle Level 1', 'Level 2', ...) with its
     page, position (in DPI pixels), number (if printed) and levels. A printed line can hold
     two headings side by side; each ends with 'Level N' / 'Levels N and M'."""
     k = DPI / 72
@@ -777,12 +777,12 @@ def _book_headings(doc):
     return heads
 
 def book_layouts(pdf_path, examples, all_examples):
-    """{id(example): layout} for the examples whose notation can be found in the book.
+    """{id(example): layout} for the examples whose notation can be found in the PDF.
     Each example is matched to a heading by its number and level (in order, for repeats),
     then gets the lines of music below that heading, down to the next heading. Where two
     headings share a line, the notes are split at the second heading's position."""
     import fitz
-    fitz.TOOLS.mupdf_display_errors(False)        # the book's fonts trigger harmless warnings
+    fitz.TOOLS.mupdf_display_errors(False)        # some PDF fonts trigger harmless warnings
     doc = fitz.open(pdf_path)
     heads = _book_headings(doc)
     # numbers for headings that don't print one: the heading above's number, unless the
@@ -906,7 +906,7 @@ def _book_layout(ex, h, g, st, skip):
     return dict(g=g, rows=rows, notes={w["i"]: xy for w, xy in zip(written, xs_all)})
 
 def _compose_book(ex, lay, fonts):
-    """Like _compose, but showing the example's lines cropped from the book's pages."""
+    """Like _compose, but showing the example's lines cropped from the PDF's pages."""
     from PIL import Image, ImageDraw
     from scipy import ndimage
     img = Image.new("RGB", (W, H), BG)
@@ -1041,7 +1041,7 @@ def cli():
                "  python3 my_rudiments.py --sheet rudiments.pdf --levels 1,2,3\n"
                "  python3 my_rudiments.py practice.mp3 --video practice.mp4 --levels 1,2,3 --seamless\n"
                "  python3 my_rudiments.py --rudiments mine.txt --only 41 --video mine.mp4\n"
-               "  python3 my_rudiments.py practice.mp3 --video practice.mp4 --pdf 40rudiments.pdf\n"
+               "  python3 my_rudiments.py practice.mp3 --video practice.mp4 --pdf notation.pdf\n"
                "  python3 my_rudiments.py nonstop.mp3 --continuous --passes 1",
         formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("output", nargs="?",
@@ -1053,11 +1053,9 @@ def cli():
     p.add_argument("--video", metavar="OUT.mp4",
                    help="write a video of the notation with a cursor following the audio")
     p.add_argument("--pdf", metavar="FILE",
-                   help="the '40 Rudiments Plain and Simple' PDF: the video then shows the book's "
-                        "own notation for every example it can find there by number and level "
-                        "(default: 40rudiments.pdf here or next to this script, if it exists)")
-    p.add_argument("--no-pdf", action="store_true",
-                   help="always draw the notation, even if the book PDF is found")
+                   help="a PDF of rudiment notation with headings like '16. Single Paradiddle "
+                        "Level 1': the video then shows the PDF's notation for every example it can "
+                        "find there by number and level (default: draw the notation)")
     p.add_argument("--levels", default="1,2", metavar="LIST",
                    help="comma-separated levels to include, e.g. 1 or 1,2 or 1,2,3 or 2,3 "
                         "(default: %(default)s)")
@@ -1123,18 +1121,11 @@ def cli():
             write_audio(pcm, a.output)
         if a.video:
             book = None
-            pdf = None if a.no_pdf else a.pdf
-            if pdf is None and not a.no_pdf:
-                for c in ("40rudiments.pdf", os.path.join(here, "40rudiments.pdf")):
-                    if os.path.exists(c):
-                        pdf = c
-                        break
-            if pdf and not os.path.exists(pdf):
-                print(f"note: {pdf} not found; drawing the notation instead", file=sys.stderr)
-                pdf = None
-            if pdf:
-                print(f"using the book's notation from {pdf}", file=sys.stderr)
-                book = book_layouts(pdf, chosen, examples)
+            if a.pdf and not os.path.exists(a.pdf):
+                print(f"note: {a.pdf} not found; drawing the notation instead", file=sys.stderr)
+            elif a.pdf:
+                print(f"using the notation in {a.pdf}", file=sys.stderr)
+                book = book_layouts(a.pdf, chosen, examples)
             render_video(timeline, pcm, a.video, book)
 
 if __name__ == "__main__":
