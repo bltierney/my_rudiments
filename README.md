@@ -17,8 +17,10 @@ The included `rudiments.txt` comes with 76 rudiment examples at Levels 1, 2 and 
 You need Python 3 and a few packages:
 
 ```bash
-pip install numpy scipy verovio pymupdf pillow
+pip install --prefer-binary numpy scipy verovio pymupdf pillow
 ```
+
+`--prefer-binary` makes pip use a ready-made package instead of trying to compile one; see [Troubleshooting](#troubleshooting) if verovio fails to install.
 
 You also need two programs:
 
@@ -152,7 +154,7 @@ The Enhanced and Premium voices sound much more natural. To download one, open S
 
 Some notes on how the options work:
 
-- **Repeat signs:** an example written between repeat signs plays twice per pass.
+- **Repeat signs:** the sample `rudiments.txt` has none; use `--passes` to set how many times each example plays. If you add repeat signs (`|: :|`) to a pattern, that part plays twice within each pass.
 - **`--seamless`:** levels of the same rudiment are joined only when they appear in order (Level 1, then 2, then 3) under the same number.
 - **`--continuous`:** the video still shows each rudiment's name, and the score switches the moment the next rudiment starts.
 
@@ -166,7 +168,7 @@ Some notes on how the options work:
 [Single paradiddle]
 number: 16
 level: 1
-pattern: |: @4 R> L R R L> R L L R> L R R L> R L L :|
+pattern: @4 R> L R R L> R L L R> L R R L> R L L
 ```
 
 | Key | Meaning |
@@ -246,13 +248,13 @@ bpm: 80
 [Paradiddle-diddle-diddle]
 number: 41
 level: 1
-pattern: |: @6 R> L R R L L R R L L R L L> R L L R R L L R R L R :|
+pattern: @6 R> L R R L L R R L L R L L> R L L R R L L R R L R
 
 [Paradiddle-diddle-diddle]
 number: 41
 level: 2
 bpm: 100
-pattern: |: @6 R> L R R L L R R L L R L L> R L L R R L L R R L R :|
+pattern: @6 R> L R R L L R R L L R L L> R L L R R L L R R L R
 
 [Flam taps and buzzes]
 level: 1
@@ -261,7 +263,7 @@ pattern: @4 fR> R fL> L fR> R fL> L fR> R fL> L fR> R fL> L |
 
 [Waltz singles]
 time: 3/4
-pattern: |: @2 R> L R L R L :|
+pattern: @2 R> L R L R L
 ```
 
 ```bash
@@ -308,11 +310,16 @@ pdf: skip 13,30                # ignore noteheads 13 and 30 (e.g. tied notes tha
 ## Troubleshooting
 
 - **`unrecognized arguments`:** your copy of the script is older than the option you're using. Get the latest `my_rudiments.py`, and check `--help` for the option.
-- **`ModuleNotFoundError: No module named ...`:** install the missing package with `pip install numpy scipy verovio pymupdf pillow`. If pip says the environment is "externally managed," use a virtual environment:
+- **`ModuleNotFoundError: No module named ...`:** install the missing package with `pip install --prefer-binary numpy scipy verovio pymupdf pillow`. If pip says the environment is "externally managed," use a virtual environment:
   ```bash
   python3 -m venv ~/rudenv && source ~/rudenv/bin/activate
-  pip install numpy scipy verovio pymupdf pillow
+  pip install --prefer-binary numpy scipy verovio pymupdf pillow
   ```
+- **`Failed building wheel for verovio`:** pip tried to compile verovio because the newest version has no ready-made package for your Mac (newest verovio needs macOS 13 Ventura or later). Install with `--prefer-binary` so pip picks the newest version that does have one:
+  ```bash
+  pip install --prefer-binary verovio
+  ```
+  If that still fails, update pip first (`python3 -m pip install --upgrade pip`) and try again.
 - **`ffmpeg not found`:** install ffmpeg (see [Setup](#setup)). Until you do, MP3 output is left as a WAV file, and the script tells you where it is.
 - **`No text-to-speech found`:** on Linux, install `espeak-ng`.
 - **An error naming a line in `rudiments.txt`:** the message gives the file, line, rudiment and the problem. For example, `can't read 'X' in the pattern` or `pattern is 5 beats long, which isn't a whole number of 4-beat bars`.

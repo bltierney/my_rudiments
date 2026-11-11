@@ -32,7 +32,7 @@
 #   number: 16
 #   level: 1
 #   bpm: 80
-#   pattern: |: @4 R> L R R L> R L L R> L R R L> R L L :|
+#   pattern: @4 R> L R R L> R L L R> L R R L> R L L
 #
 # Tempo: the "bpm:" line below sets the tempo for every example in this file.
 # An example's own bpm: line overrides it, and --bpm on the command line overrides both.
@@ -49,23 +49,23 @@ pronounce: dragadiddle = drag a diddle
 [Single stroke roll]
 number: 1
 level: 1
-pattern: |: @4 R L R L R L R L R L R L R L R L :|
+pattern: @4 R L R L R L R L R L R L R L R L
 
 [Single stroke roll]
 number: 1
 level: 2
-pattern: |: @6 R L R L R L R L R L R L R L R L R L R L R L R L :|
+pattern: @6 R L R L R L R L R L R L R L R L R L R L R L R L
 
 [Single stroke roll]
 number: 1
 level: 3
-pattern: |: @8 R L R L R L R L R L R L R L R L R L R L R L R L R L R L R L R L :|
+pattern: @8 R L R L R L R L R L R L R L R L R L R L R L R L R L R L R L R L
 
 [Single stroke four]
 number: 2
 level: 1
-pattern: |: @6 R L R @2 L @6 L R L @2 R @6 R L R @2 L @6 L R L @2 R :|
-         |: @2 R @6 R L R @2 L @6 L R L @2 R @6 R L R @2 L @6 L R L :|
+pattern: @6 R L R @2 L @6 L R L @2 R @6 R L R @2 L @6 L R L @2 R |
+         @2 R @6 R L R @2 L @6 L R L @2 R @6 R L R @2 L @6 L R L
 
 [Single stroke four]
 number: 2
@@ -83,12 +83,12 @@ pattern: @6 R L R L R L @2 R @6 L R L R L R @2 L @6 R L R L R L |
 [Multiple bounce roll]
 number: 4
 level: 1
-pattern: |: @4 Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz :|
+pattern: @4 Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz
 
 [Multiple bounce roll]
 number: 4
 level: 2
-pattern: |: @6 Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz :|
+pattern: @6 Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz
 
 [Triple stroke roll]
 number: 5
@@ -99,17 +99,17 @@ pattern: @6 R R R L L L R R R L L L R R R L L L R R R L L L |
 [Double stroke roll]
 number: 6
 level: 1
-pattern: |: @4 R R L L R R L L R R L L R R L L :|
+pattern: @4 R R L L R R L L R R L L R R L L
 
 [Double stroke roll]
 number: 6
 level: 2
-pattern: |: @6 R R L L R R L L R R L L R R L L R R L L R R L L :|
+pattern: @6 R R L L R R L L R R L L R R L L R R L L R R L L
 
 [Double stroke roll]
 number: 6
 level: 3
-pattern: |: @8 R R L L R R L L R R L L R R L L R R L L R R L L R R L L R R L L :|
+pattern: @8 R R L L R R L L R R L L R R L L R R L L R R L L R R L L R R L L
 
 [Five stroke roll]
 number: 7
@@ -120,28 +120,28 @@ pattern: @4 R~ L~ R> L~ R~ L> R~ L~ R> L~ R~ L> R~ L~ R> L~ |
 [Five stroke roll]
 number: 7
 level: 2
-pattern: |: @3 R> L~ R~ L> R~ L~ R> L~ R~ L> R~ L~ :|
-         |: @3 R~ L~ R> L~ R~ L> R~ L~ R> L~ R~ L> :|
+pattern: @3 R> L~ R~ L> R~ L~ R> L~ R~ L> R~ L~ |
+         @3 R~ L~ R> L~ R~ L> R~ L~ R> L~ R~ L>
 
 [Six stroke roll]
 number: 8
 level: 1
-pattern: |: @4 R> L~ R~ L> R> L~ R~ L> R> L~ R~ L> R> L~ R~ L> :|
+pattern: @4 R> L~ R~ L> R> L~ R~ L> R> L~ R~ L> R> L~ R~ L>
 
 [Six stroke roll]
 number: 8
 level: 2
-pattern: |: @4 R~ L> R> L~ R~ L> R> L~ R~ L> R> L~ R~ L> R> L~ :|
+pattern: @4 R~ L> R> L~ R~ L> R> L~ R~ L> R> L~ R~ L> R> L~
 
 [Seven stroke roll]
 number: 9
 level: 1
-pattern: |: @4 R> L~ R~ L~ R> L~ R~ L~ R> L~ R~ L~ R> L~ R~ L~ :|
+pattern: @4 R> L~ R~ L~ R> L~ R~ L~ R> L~ R~ L~ R> L~ R~ L~
 
 [Seven stroke roll]
 number: 9
 level: 2
-pattern: |: @2 R> @6 L~ R~ L~ @2 R> @6 L~ R~ L~ @2 R> @6 L~ R~ L~ @2 R> @6 L~ R~ L~ :|
+pattern: @2 R> @6 L~ R~ L~ @2 R> @6 L~ R~ L~ @2 R> @6 L~ R~ L~ @2 R> @6 L~ R~ L~
 
 [Nine stroke roll]
 number: 10
@@ -176,12 +176,12 @@ pattern: @4 L> R~ L~ R~ L~ R~ L> R~ L~ R~ L~ R~ L> R~ L~ R~ |
 [Thirteen stroke roll]
 number: 13
 level: 1
-pattern: |: @4 R~ L~ R~ L~ R~ L~ @2 R> @4 L~ R~ L~ R~ L~ R~ @2 L> :|
+pattern: @4 R~ L~ R~ L~ R~ L~ @2 R> @4 L~ R~ L~ R~ L~ R~ @2 L>
 
 [Fifteen stroke roll]
 number: 14
 level: 1
-pattern: |: @4 R> L~ R~ L~ R~ L~ R~ L~ R> L~ R~ L~ R~ L~ R~ L~ :|
+pattern: @4 R> L~ R~ L~ R~ L~ R~ L~ R> L~ R~ L~ R~ L~ R~ L~
 
 [Seventeen stroke roll]
 number: 15
@@ -192,17 +192,17 @@ pattern: @4 R~ L~ R~ L~ R~ L~ R~ L~ @1 R> @4 L~ R~ L~ R~ |
 [Single paradiddle]
 number: 16
 level: 1
-pattern: |: @4 R> L R R L> R L L R> L R R L> R L L :|
+pattern: @4 R> L R R L> R L L R> L R R L> R L L
 
 [Single paradiddle]
 number: 16
 level: 2
-pattern: |: @6 R> L R R L> R L L R> L R R L> R L L R> L R R L> R L L :|
+pattern: @6 R> L R R L> R L L R> L R R L> R L L R> L R R L> R L L
 
 [Single paradiddle]
 number: 16
 level: 3
-pattern: |: @8 R> L R R L> R L L R> L R R L> R L L R> L R R L> R L L R> L R R L> R L L :|
+pattern: @8 R> L R R L> R L L R> L R R L> R L L R> L R R L> R L L R> L R R L> R L L
 
 [Double paradiddle]
 number: 17
@@ -237,7 +237,7 @@ pattern: @6 R> L R L R L R R L> R L R L R L L R> L R L R L R R |
 [Triple paradiddle]
 number: 18
 level: 3
-pattern: |: @8 R> L R L R L R R L> R L R L R L L R> L R L R L R R L> R L R L R L L :|
+pattern: @8 R> L R L R L R R L> R L R L R L L R> L R L R L R R L> R L R L R L L
 
 [Paradiddle diddle]
 number: 19
@@ -278,17 +278,17 @@ pattern: @8 L> R L L R R L> R L L R R L> R L L R R L> R L L R R L> R L L R R L> 
 [Flams]
 number: 20
 level: 1
-pattern: |: @2 fR> fL> fR> fL> fR> fL> fR> fL> :|
+pattern: @2 fR> fL> fR> fL> fR> fL> fR> fL>
 
 [Flams]
 number: 20
 level: 2
-pattern: |: @3 fR> fL> fR> fL> fR> fL> fR> fL> fR> fL> fR> fL> :|
+pattern: @3 fR> fL> fR> fL> fR> fL> fR> fL> fR> fL> fR> fL>
 
 [Flams]
 number: 20
 level: 3
-pattern: |: @4 fR> fL> fR> fL> fR> fL> fR> fL> fR> fL> fR> fL> fR> fL> fR> fL> :|
+pattern: @4 fR> fL> fR> fL> fR> fL> fR> fL> fR> fL> fR> fL> fR> fL> fR> fL>
 
 [Flam accent]
 number: 21
@@ -311,12 +311,12 @@ pattern: @4 fL> R L fR> L R fL> R L fR> L R fL> R L fR> |
 [Flam tap]
 number: 22
 level: 1
-pattern: |: @4 fR> R fL> L fR> R fL> L fR> R fL> L fR> R fL> L :|
+pattern: @4 fR> R fL> L fR> R fL> L fR> R fL> L fR> R fL> L
 
 [Flamacue]
 number: 23
 level: 1
-pattern: |: @4 fR L> R L @1 fR> @4 fL R> L R @1 fL> :|
+pattern: @4 fR L> R L @1 fR> @4 fL R> L R @1 fL>
 
 [Flamacue as a three bar phrase]
 number: 23
@@ -327,12 +327,12 @@ pattern: @4 fR L> R L @2 fR> @4 fL R> L R @2 fL> @4 fR L> R L |
 [Flam paradiddle]
 number: 24
 level: 1
-pattern: |: @4 fR> L R R fL> R L L fR> L R R fL> R L L :|
+pattern: @4 fR> L R R fL> R L L fR> L R R fL> R L L
 
 [Single flammed mill]
 number: 25
 level: 1
-pattern: |: @4 fR> R L R fL> L R L fR> R L R fL> L R L :|
+pattern: @4 fR> R L R fL> L R L fR> R L R fL> L R L
 
 [Flam paradiddle diddle]
 number: 26
@@ -373,12 +373,12 @@ pattern: @6 fL> L R fL> L R fL> L R fL> L R fL> L R fL> L R fL> L R fL> L R |
 [Inverted flam tap]
 number: 29
 level: 1
-pattern: |: @4 fR> L fL> R fR> L fL> R fR> L fL> R fR> L fL> R :|
+pattern: @4 fR> L fL> R fR> L fL> R fR> L fL> R fR> L fL> R
 
 [Flam drag]
 number: 30
 level: 1
-pattern: |: @3 fR> L~ R fL> R~ L fR> L~ R fL> R~ L :|
+pattern: @3 fR> L~ R fL> R~ L fR> L~ R fL> R~ L
 
 [Flam drag, as sixteenth notes]
 number: 30
@@ -401,32 +401,32 @@ pattern: @4 gR> L> R~ L> R> L~ R> L> R~ L> R> L~ R> L> R~ L> |
 [Single drag, as sextuplets]
 number: 32
 level: 2
-pattern: |: @6 R> L~ R L> R~ L R> L~ R L> R~ L R> L~ R L> R~ L R> L~ R L> R~ L :|
+pattern: @6 R> L~ R L> R~ L R> L~ R L> R~ L R> L~ R L> R~ L R> L~ R L> R~ L
 
 [Double drag]
 number: 33
 level: 3
-pattern: |: @3 R gR L> gL gL R> gR gR L> gL gL R> :|
+pattern: @3 R gR L> gL gL R> gR gR L> gL gL R>
 
 [Lesson 25]
 number: 34
 level: 1
-pattern: |: @4 gR L @2 R> @4 gR L @2 R> @4 gR L @2 R> @4 gR L @2 R> :|
+pattern: @4 gR L @2 R> @4 gR L @2 R> @4 gR L @2 R> @4 gR L @2 R>
 
 [Lesson 25, off the left hand]
 number: 34
 level: 2
-pattern: |: @4 gL R @2 L> @4 gL R @2 L> @4 gL R @2 L> @4 gL R @2 L> :|
+pattern: @4 gL R @2 L> @4 gL R @2 L> @4 gL R @2 L> @4 gL R @2 L>
 
 [Lesson 25, alternate rhythm]
 number: 34
 level: 1
-pattern: |: @2 R @4 gR L> @2 R @4 gR L> @2 R @4 gR L> @2 R @4 gR L> :|
+pattern: @2 R @4 gR L> @2 R @4 gR L> @2 R @4 gR L> @2 R @4 gR L>
 
 [Lesson 25, alternate rhythm off the left hand]
 number: 34
 level: 2
-pattern: |: @2 L @4 gL R> @2 L @4 gL R> @2 L @4 gL R> @2 L @4 gL R> :|
+pattern: @2 L @4 gL R> @2 L @4 gL R> @2 L @4 gL R> @2 L @4 gL R>
 
 [Single dragadiddle]
 number: 35
@@ -443,12 +443,12 @@ pattern: @2 R> @4 gR L R R @2 L> @4 gL R L L @2 R> @4 gR L |
 [Drag paradiddle number 1, as sextuplets]
 number: 36
 level: 2
-pattern: |: @6 R> L~ R L R R L> R~ L R L L R> L~ R L R R L> R~ L R L L :|
+pattern: @6 R> L~ R L R R L> R~ L R L L R> L~ R L R R L> R~ L R L L
 
 [Drag paradiddle number 2]
 number: 37
 level: 1
-pattern: |: @2 R> gR @4 gR L R R @2 L> gL @4 gL R L L :|
+pattern: @2 R> gR @4 gR L R R @2 L> gL @4 gL R L L
 
 [Single ratamacue]
 number: 38
