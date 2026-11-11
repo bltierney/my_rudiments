@@ -1,0 +1,471 @@
+# Drum rudiments for rudiment_generator.py
+#
+# Each example starts with its name in square brackets, followed by key: value lines.
+#
+#   [Name]            the rudiment's name (spoken and printed)
+#   number: 16        optional; examples with the same number are grouped for --seamless
+#   level: 1          1, 2 or 3 (or a list like 2,3); default 1
+#   time: 4/4         optional; beats per bar over 4 (default 4/4)
+#   bpm: 80           optional; tempo for this example (default: the file-wide bpm below)
+#   pdf: ...          optional, rarely needed. With --pdf, examples are found in the book by
+#                     their number and level. Use this to point somewhere else, e.g.
+#                     'pdf: page 3, line 2' ('lines 4-5' for two lines, 'part 2' for the right-
+#                     hand example on a shared line), or 'pdf: skip 13,30' to ignore noteheads
+#                     that aren't struck (counting the example's notes from 1).
+#   pattern: ...      the notes; may continue on the following indented lines
+#
+# Pattern codes (separate everything with spaces):
+#   R  L        a stroke with the right / left hand
+#   >           accent, written after the stroke:      R>
+#   f           flam (grace note from the other hand):  fR  fL>
+#   g           drag (two grace notes, other hand):     gR  gL>
+#   ~           diddle (two strokes, same hand):        R~
+#   z           buzz stroke:                            Rz
+#   .           rest
+#   @N          from here on, N notes per beat:  @1 quarters, @2 eighths, @3 eighth triplets,
+#               @4 sixteenths, @6 sextuplets, @8 thirty-seconds
+#   |           bar line (optional; bars are filled automatically)
+#   |:  :|      repeat signs; the part between them is played twice
+#
+# Example:
+#   [Single paradiddle]
+#   number: 16
+#   level: 1
+#   bpm: 80
+#   pattern: |: @4 R> L R R L> R L L R> L R R L> R L L :|
+#
+# Tempo: the "bpm:" line below sets the tempo for every example in this file.
+# An example's own bpm: line overrides it, and --bpm on the command line overrides both.
+
+bpm: 70
+
+# Pronunciation: respell words the voice says wrong (titles on screen keep the real spelling).
+# Try a spelling first with:  say "rat-uh-muh-cue"
+pronounce: ratamacue = rat-uh-muh-cue
+pronounce: pataflafla = pat a fla fla
+pronounce: flamacue = flam a cue
+pronounce: dragadiddle = drag a diddle
+
+[Single stroke roll]
+number: 1
+level: 1
+pattern: |: @4 R L R L R L R L R L R L R L R L :|
+
+[Single stroke roll]
+number: 1
+level: 2
+pattern: |: @6 R L R L R L R L R L R L R L R L R L R L R L R L :|
+
+[Single stroke roll]
+number: 1
+level: 3
+pattern: |: @8 R L R L R L R L R L R L R L R L R L R L R L R L R L R L R L R L :|
+
+[Single stroke four]
+number: 2
+level: 1
+pattern: |: @6 R L R @2 L @6 L R L @2 R @6 R L R @2 L @6 L R L @2 R :|
+         |: @2 R @6 R L R @2 L @6 L R L @2 R @6 R L R @2 L @6 L R L :|
+
+[Single stroke four]
+number: 2
+level: 2,3
+pdf: skip 13,30          # two tied notes in the book that aren't struck
+pattern: @12 R L R @2 L @12 L R L @2 R @12 R L R @2 L @12 L R L @2 R @12 R L R @2 L @12 L R L |
+         @2 R @12 R L R @2 L @12 L R L @2 R @12 R L R @2 L @12 L R L @2 R .
+
+[Single stroke seven]
+number: 3
+level: 1
+pattern: @6 R L R L R L @2 R @6 L R L R L R @2 L @6 R L R L R L |
+         @2 R @6 L R L R L R @2 L @6 R L R L R L @1 R
+
+[Multiple bounce roll]
+number: 4
+level: 1
+pattern: |: @4 Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz :|
+
+[Multiple bounce roll]
+number: 4
+level: 2
+pattern: |: @6 Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz Rz Lz :|
+
+[Triple stroke roll]
+number: 5
+level: 3
+pattern: @6 R R R L L L R R R L L L R R R L L L R R R L L L |
+         @6 R R R L L L R R R L L L R R R L L L R R R L L L
+
+[Double stroke roll]
+number: 6
+level: 1
+pattern: |: @4 R R L L R R L L R R L L R R L L :|
+
+[Double stroke roll]
+number: 6
+level: 2
+pattern: |: @6 R R L L R R L L R R L L R R L L R R L L R R L L :|
+
+[Double stroke roll]
+number: 6
+level: 3
+pattern: |: @8 R R L L R R L L R R L L R R L L R R L L R R L L R R L L R R L L :|
+
+[Five stroke roll]
+number: 7
+level: 1
+pattern: @4 R~ L~ R> L~ R~ L> R~ L~ R> L~ R~ L> R~ L~ R> L~ |
+         @4 R~ L> R~ L~ R> L~ R~ L> R~ L~ R> L~ R~ L> R~ L~
+
+[Five stroke roll]
+number: 7
+level: 2
+pattern: |: @3 R> L~ R~ L> R~ L~ R> L~ R~ L> R~ L~ :|
+         |: @3 R~ L~ R> L~ R~ L> R~ L~ R> L~ R~ L> :|
+
+[Six stroke roll]
+number: 8
+level: 1
+pattern: |: @4 R> L~ R~ L> R> L~ R~ L> R> L~ R~ L> R> L~ R~ L> :|
+
+[Six stroke roll]
+number: 8
+level: 2
+pattern: |: @4 R~ L> R> L~ R~ L> R> L~ R~ L> R> L~ R~ L> R> L~ :|
+
+[Seven stroke roll]
+number: 9
+level: 1
+pattern: |: @4 R> L~ R~ L~ R> L~ R~ L~ R> L~ R~ L~ R> L~ R~ L~ :|
+
+[Seven stroke roll]
+number: 9
+level: 2
+pattern: |: @2 R> @6 L~ R~ L~ @2 R> @6 L~ R~ L~ @2 R> @6 L~ R~ L~ @2 R> @6 L~ R~ L~ :|
+
+[Nine stroke roll]
+number: 10
+level: 1
+pattern: @2 R> @4 L~ R~ L~ R~ @2 L> @4 R~ L~ R~ L~ @2 R> @4 L~ R~ |
+         @4 L~ R~ @2 L> @4 R~ L~ R~ L~ @2 R> @4 L~ R~ L~ R~ @2 L>
+
+[Ten stroke roll]
+number: 11
+level: 1
+pattern: @4 R> L> R~ L~ R~ L~ R> L> R~ L~ R~ L~ R> L> R~ L~ |
+         @4 R~ L~ R> L> R~ L~ R~ L~ R> L> R~ L~ R~ L~ R> L>
+
+[Ten stroke roll]
+number: 11
+level: 2
+pattern: @4 R> L~ R~ L~ R~ L> R> L~ R~ L~ R~ L> R> L~ R~ L~ |
+         @4 R~ L> R> L~ R~ L~ R~ L> R> L~ R~ L~ R~ L> @2 R>
+
+[Eleven stroke roll]
+number: 12
+level: 1
+pattern: @4 R> L~ R~ L~ R~ L~ R> L~ R~ L~ R~ L~ R> L~ R~ L~ |
+         @4 R~ L~ R> L~ R~ L~ R~ L~ R> L~ R~ L~ R~ L~ @2 R>
+
+[Eleven stroke roll]
+number: 12
+level: 2
+pattern: @4 L> R~ L~ R~ L~ R~ L> R~ L~ R~ L~ R~ L> R~ L~ R~ |
+         @4 L~ R~ L> R~ L~ R~ L~ R~ L> R~ L~ R~ L~ R~ @2 L>
+
+[Thirteen stroke roll]
+number: 13
+level: 1
+pattern: |: @4 R~ L~ R~ L~ R~ L~ @2 R> @4 L~ R~ L~ R~ L~ R~ @2 L> :|
+
+[Fifteen stroke roll]
+number: 14
+level: 1
+pattern: |: @4 R> L~ R~ L~ R~ L~ R~ L~ R> L~ R~ L~ R~ L~ R~ L~ :|
+
+[Seventeen stroke roll]
+number: 15
+level: 1
+pattern: @4 R~ L~ R~ L~ R~ L~ R~ L~ @1 R> @4 L~ R~ L~ R~ |
+         @4 L~ R~ L~ R~ @1 L> @4 R~ L~ @2 R> @4 L~ R~ @2 L>
+
+[Single paradiddle]
+number: 16
+level: 1
+pattern: |: @4 R> L R R L> R L L R> L R R L> R L L :|
+
+[Single paradiddle]
+number: 16
+level: 2
+pattern: |: @6 R> L R R L> R L L R> L R R L> R L L R> L R R L> R L L :|
+
+[Single paradiddle]
+number: 16
+level: 3
+pattern: |: @8 R> L R R L> R L L R> L R R L> R L L R> L R R L> R L L R> L R R L> R L L :|
+
+[Double paradiddle]
+number: 17
+level: 1
+pattern: @4 R> L R L R R L> R L R L L R> L R L |
+         @4 R R L> R L R L L R> L R R L> R L L
+
+[Double paradiddle]
+number: 17
+level: 2
+pattern: @6 R> L R L R R L> R L R L L R> L R L R R L> R L R L L |
+         @6 R> L R L R R L> R L R L L R> L R L R R L> R L R L L
+
+[Double paradiddle]
+number: 17
+level: 3
+pattern: @8 R> L R L R R L> R L R L L R> L R L R R L> R L R L L R> L R L R R L> R |
+         @8 L R L L R> L R L R R L> R L R L L R> L R L R R L> R L R L L @2 R>
+
+[Triple paradiddle]
+number: 18
+level: 1
+pattern: @4 R> L R L R L R R L> R L R L R L L |
+         @4 R> L R L R L R R L> R L R L R L L
+
+[Triple paradiddle]
+number: 18
+level: 2
+pattern: @6 R> L R L R L R R L> R L R L R L L R> L R L R L R R |
+         @6 L> R L R L R L L R> L R L R L R R L> R L R L R L L
+
+[Triple paradiddle]
+number: 18
+level: 3
+pattern: |: @8 R> L R L R L R R L> R L R L R L L R> L R L R L R R L> R L R L R L L :|
+
+[Paradiddle diddle]
+number: 19
+level: 1
+pattern: @4 R> L R R L L R> L R R L L R> L R R |
+         @4 L L R> L R R L L R> L R R L> R L L
+
+[Paradiddle diddle]
+number: 19
+level: 2
+pattern: @6 R> L R R L L R> L R R L L R> L R R L L R> L R R L L |
+         @6 R> L R R L L R> L R R L L R> L R R L L R> L R R L L
+
+[Paradiddle diddle]
+number: 19
+level: 3
+pattern: @8 R> L R R L L R> L R R L L R> L R R L L R> L R R L L R> L R R L L R> L |
+         @8 R R L L R> L R R L L R> L R R L L R> L R R L L R> L R R L L @2 R>
+
+[Paradiddle diddle, off the left]
+number: 19
+level: 1
+pattern: @4 L> R L L R R L> R L L R R L> R L L |
+         @4 R R L> R L L R R L> R L L R> L R R
+
+[Paradiddle diddle, off the left]
+number: 19
+level: 2
+pattern: @6 L> R L L R R L> R L L R R L> R L L R R L> R L L R R |
+         @6 L> R L L R R L> R L L R R L> R L L R R L> R L L R R
+
+[Paradiddle diddle, off the left]
+number: 19
+level: 3
+pattern: @8 L> R L L R R L> R L L R R L> R L L R R L> R L L R R L> R L L R R L> R |
+         @8 L L R R L> R L L R R L> R L L R R L> R L L R R L> R L L R R @2 L>
+
+[Flams]
+number: 20
+level: 1
+pattern: |: @2 fR> fL> fR> fL> fR> fL> fR> fL> :|
+
+[Flams]
+number: 20
+level: 2
+pattern: |: @3 fR> fL> fR> fL> fR> fL> fR> fL> fR> fL> fR> fL> :|
+
+[Flams]
+number: 20
+level: 3
+pattern: |: @4 fR> fL> fR> fL> fR> fL> fR> fL> fR> fL> fR> fL> fR> fL> fR> fL> :|
+
+[Flam accent]
+number: 21
+level: 1
+pattern: @3 fR> L R fL> R L fR> L R fL> R L |
+         @3 fR> L R fL> R L fR> L R fL> R L
+
+[Flam accent]
+number: 21
+level: 2
+pattern: @4 fR> L R fL> R L fR> L R fL> R L fR> L R fL> |
+         @4 R L fR> L R fL> R L fR> L R fL> R L @2 fR>
+
+[Flam accent]
+number: 21
+level: 3
+pattern: @4 fL> R L fR> L R fL> R L fR> L R fL> R L fR> |
+         @4 L R fL> R L fR> L R fL> R L fR> L R @2 fL>
+
+[Flam tap]
+number: 22
+level: 1
+pattern: |: @4 fR> R fL> L fR> R fL> L fR> R fL> L fR> R fL> L :|
+
+[Flamacue]
+number: 23
+level: 1
+pattern: |: @4 fR L> R L @1 fR> @4 fL R> L R @1 fL> :|
+
+[Flamacue as a three bar phrase]
+number: 23
+level: 2
+pattern: @4 fR L> R L @2 fR> @4 fL R> L R @2 fL> @4 fR L> R L |
+         @2 fR> @4 fL R> L R @2 fL> @4 fR L> R L @1 fR>
+
+[Flam paradiddle]
+number: 24
+level: 1
+pattern: |: @4 fR> L R R fL> R L L fR> L R R fL> R L L :|
+
+[Single flammed mill]
+number: 25
+level: 1
+pattern: |: @4 fR> R L R fL> L R L fR> R L R fL> L R L :|
+
+[Flam paradiddle diddle]
+number: 26
+level: 1
+pattern: @4 fR> L R R L L fL> R L L R R fR> L R R |
+         @4 L L fL> R L L R R fR> L R R fL> R L L
+
+[Pataflafla]
+number: 27
+level: 1
+pattern: @4 fR> L R fL> fR> L R fL> fR> L R fL> fR> L R fL> |
+         @4 fR> L R fL> fR> L R fL> fR> L R fL> fR> L R fL>
+
+[Swiss army triplet]
+number: 28
+level: 1
+pattern: @4 fR> R L fR> R L fR> R L fR> R L fR> R L fR> |
+         @4 R L fR> R L fR> R L fR> R L fR> R L @2 fR>
+
+[Swiss army triplet]
+number: 28
+level: 2
+pattern: @6 fR> R L fR> R L fR> R L fR> R L fR> R L fR> R L fR> R L fR> R L |
+         @6 fR> R L fR> R L fR> R L fR> R L fR> R L fR> R L fR> R L @2 fR>
+
+[Swiss army triplet off the left hand]
+number: 28
+level: 3
+pattern: @4 fL> L R fL> L R fL> L R fL> L R fL> L R fL> |
+         @4 L R fL> L R fL> L R fL> L R fL> L R @2 fL>
+
+[Swiss army triplet off the left hand, as sextuplets]
+number: 28
+level: 3
+pattern: @6 fL> L R fL> L R fL> L R fL> L R fL> L R fL> L R fL> L R fL> L R |
+         @6 fL> L R fL> L R fL> L R fL> L R fL> L R fL> L R fL> L R @2 fL>
+
+[Inverted flam tap]
+number: 29
+level: 1
+pattern: |: @4 fR> L fL> R fR> L fL> R fR> L fL> R fR> L fL> R :|
+
+[Flam drag]
+number: 30
+level: 1
+pattern: |: @3 fR> L~ R fL> R~ L fR> L~ R fL> R~ L :|
+
+[Flam drag, as sixteenth notes]
+number: 30
+level: 2
+pattern: @4 fR> L~ R fL> R~ L fR> L~ R fL> R~ L fR> L~ R fL> |
+         @4 R~ L fR> L~ R fL> R~ L fR> L~ R fL> R~ L @2 fR>
+
+[Drag]
+number: 31
+level: 1
+pattern: @2 gR gL gR gL gR gL gR gL |
+         @2 gR gL gR gL gR gL gR gL
+
+[Single drag]
+number: 32
+level: 1
+pattern: @4 gR> L> R~ L> R> L~ R> L> R~ L> R> L~ R> L> R~ L> |
+         @4 R> L~ R> L> R~ L> R> L~ R> L> R~ L> @1 R>
+
+[Single drag, as sextuplets]
+number: 32
+level: 2
+pattern: |: @6 R> L~ R L> R~ L R> L~ R L> R~ L R> L~ R L> R~ L R> L~ R L> R~ L :|
+
+[Double drag]
+number: 33
+level: 3
+pattern: |: @3 R gR L> gL gL R> gR gR L> gL gL R> :|
+
+[Lesson 25]
+number: 34
+level: 1
+pattern: |: @4 gR L @2 R> @4 gR L @2 R> @4 gR L @2 R> @4 gR L @2 R> :|
+
+[Lesson 25, off the left hand]
+number: 34
+level: 2
+pattern: |: @4 gL R @2 L> @4 gL R @2 L> @4 gL R @2 L> @4 gL R @2 L> :|
+
+[Lesson 25, alternate rhythm]
+number: 34
+level: 1
+pattern: |: @2 R @4 gR L> @2 R @4 gR L> @2 R @4 gR L> @2 R @4 gR L> :|
+
+[Lesson 25, alternate rhythm off the left hand]
+number: 34
+level: 2
+pattern: |: @2 L @4 gL R> @2 L @4 gL R> @2 L @4 gL R> @2 L @4 gL R> :|
+
+[Single dragadiddle]
+number: 35
+level: 1
+pattern: @4 R~> L R R L~> R L L R~> L R R L~> R L L |
+         @4 R~> L R R L~> R L L R~> L R R L~> R L L
+
+[Drag paradiddle number 1]
+number: 36
+level: 1
+pattern: @2 R> @4 gR L R R @2 L> @4 gL R L L @2 R> @4 gR L |
+         @4 R R @2 L> @4 gL R L L @6 R> L~ R L R R L> R~ L R L L
+
+[Drag paradiddle number 1, as sextuplets]
+number: 36
+level: 2
+pattern: |: @6 R> L~ R L R R L> R~ L R L L R> L~ R L R R L> R~ L R L L :|
+
+[Drag paradiddle number 2]
+number: 37
+level: 1
+pattern: |: @2 R> gR @4 gR L R R @2 L> gL @4 gL R L L :|
+
+[Single ratamacue]
+number: 38
+level: 1
+pattern: @6 gR L R @2 L> @6 gL R L @2 R> @6 gR L R @2 L> @6 gL R L @2 R> |
+         @6 gR L R @2 L> @6 gL R L @2 R> @6 gR L R @2 L> @6 gL R L @2 R>
+
+[Double ratamacue]
+number: 39
+level: 1
+pattern: @2 gR @6 gR L R @2 L> gL @6 gL R L @2 R> gR @6 gR L R |
+         @2 L> gL @6 gL R L @2 R> gR @6 gR L R @1 L> |
+         @2 gL @6 gL R L @2 R> gR @6 gR L R @2 L> gL @6 gL R L |
+         @2 R> gR @6 gR L R @2 L> gL @6 gL R L @1 R>
+
+[Triple ratamacue]
+number: 40
+level: 1
+pattern: @2 gR gR @6 gR L R @2 L> gL gL @6 gL R L @2 R> |
+         @2 gR gR @6 gR L R @2 L> gL gL @6 gL R L @2 R>
