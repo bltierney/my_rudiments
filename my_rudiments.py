@@ -1200,7 +1200,7 @@ def cli():
     p.add_argument("--bpm", type=float, default=None,
                    help="tempo for everything, overriding any bpm in the rudiments file "
                         f"(default: the file's bpm, else {DEFAULT_BPM})")
-    p.add_argument("--passes", type=int, default=2,
+    p.add_argument("--passes", type=int, default=1,
                    help="times each example is played (default: %(default)s)")
     p.add_argument("--tap", type=float, default=TAP, metavar="LEVEL",
                    help="volume of unaccented strokes, 0-1, relative to accents at 1.0. "
@@ -1231,6 +1231,8 @@ def cli():
         p.error("--drum-volume must be between 0.1 and 3")
     if a.bpm is not None and not 10 <= a.bpm <= 400:
         p.error("--bpm must be between 10 and 400")
+    if a.passes < 1:
+        p.error("--passes must be 1 or more")
 
     # what to make: a video by default, an audio file with --audio-only
     if a.output is None and not a.sheet:

@@ -44,7 +44,7 @@ Run the program from the folder that holds your `rudiments.txt`; that's where it
 python3 my_rudiments.py --output practice.mp4
 ```
 
-This makes `practice.mp4`: every Level 1 and 2 rudiment at 70 bpm, each played twice, straight through with no pauses.
+This makes `practice.mp4`: every Level 1 and 2 rudiment at 70 bpm, each played once, straight through with no pauses. Add `--passes 4` (for example) to play each one more times.
 
 For an audio track instead, with each rudiment's name spoken and a count-in before it:
 
@@ -105,7 +105,7 @@ Each example in the video has:
 
 - its name across the top,
 - a "1 2 3 4" count-in indicator,
-- a "Pass 1 of 2 · 70 bpm" status line,
+- a "Pass 1 of 4 · 70 bpm" status line (with `--passes 4`),
 - an orange cursor that moves from note to note in time with the audio,
 - a "Next up" panel at the bottom showing the next example's title and first line of music (the next level, during a `--join-levels` take). `--no-next-up` leaves it out and gives the current score more room.
 
@@ -145,7 +145,7 @@ python3 my_rudiments.py --audio-only --output practice.mp3 --drum-volume 0.8
 python3 my_rudiments.py --audio-only --output practice.mp3 --drum-volume 2
 
 # Straight through with no pauses and no voice
-python3 my_rudiments.py --audio-only --output nonstop.mp3 --no-pauses --passes 1
+python3 my_rudiments.py --audio-only --output nonstop.mp3 --no-pauses
 ```
 
 ### PDF sheet
@@ -194,7 +194,7 @@ The Enhanced and Premium voices sound much more natural. To download one, open S
 | `--only LIST` | Only these rudiments: comma-separated numbers, ranges and/or parts of names, e.g. `16,19`, `10-20` or `1-5,16,paradiddle` | all |
 | `--join-levels` | With pauses: play a rudiment's levels back to back, with one spoken name and count-in for the lot | off |
 | `--bpm BPM` | Tempo for everything; overrides any `bpm:` in the file | file's `bpm:`, else 70 |
-| `--passes N` | Times each example is played | 2 |
+| `--passes N` | Times each example is played | 1 |
 | `--tap LEVEL` | Volume of unaccented strokes (0–1, accents are 1.0). Lower means louder-sounding accents | 0.15 |
 | `--grace LEVEL` | Volume of flam and drag grace notes (0–1) | about half of `--tap` |
 | `--drum-volume X` | Drums and click relative to the voice. Higher makes the drums louder against the voice; 0.8 is an even balance. The drums play as loud as the file allows, and above 1.0 the voice is turned down to get the balance, so turn your speaker up a little | 1.5 |
