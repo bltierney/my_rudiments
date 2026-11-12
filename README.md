@@ -4,9 +4,11 @@ Python script to generate custom drum rudiment play-along audio, videos and prac
 
 `my_rudiments.py` reads drum patterns from a plain text file (`rudiments.txt`) and makes:
 
-- **Audio (MP3 or WAV).** For each rudiment, a voice says its name, a click counts you in, and then the rudiment plays. Accents, flams, drags, diddles and buzzes all sound distinct. Right-hand strokes are panned slightly right and left-hand strokes slightly left.
-- **A PDF practice sheet** with the notation and sticking.
-- **A video** of the notation with a cursor that follows the audio note by note.
+- **A video (the default)** of the notation with a cursor that follows the audio note by note. The examples play straight through, one after another, with a preview of the next one at the bottom of the screen.
+- **An audio track (`--audio-only`, MP3 or WAV).** Before each rudiment, a voice says its name and a click counts you in.
+- **A PDF practice sheet (`--sheet`)** with the notation and sticking.
+
+In both the video and the audio, accents, flams, drags, diddles and buzzes all sound distinct. Right-hand strokes are panned slightly right and left-hand strokes slightly left.
 
 The included `rudiments.txt` comes with 76 rudiment examples at Levels 1, 2 and 3. You can edit those or add your own.
 
@@ -31,7 +33,7 @@ You also need two programs:
   - macOS: nothing to install; the built-in `say` command is used.
   - Linux: `sudo apt install espeak-ng`
 
-Run the program from the folder that holds your `rudiments.txt`; that's where it looks by default. `my_rudiments.py` itself can live anywhere, e.g. `python3 ~/Claude/my_rudiments/my_rudiments.py practice.mp3`. To use a file somewhere else, pass `--rudiments FILE`.
+Run the program from the folder that holds your `rudiments.txt`; that's where it looks by default. `my_rudiments.py` itself can live anywhere, e.g. `python3 ~/Claude/my_rudiments/my_rudiments.py --output practice.mp4`. To use a file somewhere else, pass `--rudiments FILE`.
 
 
 ---
@@ -39,10 +41,16 @@ Run the program from the folder that holds your `rudiments.txt`; that's where it
 ## Quick start
 
 ```bash
-python3 my_rudiments.py practice.mp3
+python3 my_rudiments.py --output practice.mp4
 ```
 
-This makes `practice.mp3` with every Level 1 and 2 rudiment at 70 bpm, each played twice.
+This makes `practice.mp4`: every Level 1 and 2 rudiment at 70 bpm, each played twice, straight through with no pauses.
+
+For an audio track instead, with each rudiment's name spoken and a count-in before it:
+
+```bash
+python3 my_rudiments.py --audio-only --output practice.mp3
+```
 
 To see every option:
 
@@ -52,74 +60,45 @@ python3 my_rudiments.py --help
 
 ---
 
+## Pauses
+
+There are two ways to play the rudiments:
+
+- **No pauses:** one count-in at the start, then every example straight after the previous one, with no voice. This is the default for videos, where the title and the "Next up" panel tell you what's coming.
+- **With pauses:** before each example, a voice says its name and a click counts you in. This is the default for `--audio-only`, where the spoken names are the only way to know what's next.
+
+`--pauses` and `--no-pauses` switch either one, e.g. `--output practice.mp4 --pauses` or `--audio-only --output nonstop.mp3 --no-pauses`.
+
+---
+
 ## Examples
-
-### Audio
-
-```bash
-# Levels 1 and 2 (the default)
-python3 my_rudiments.py practice.mp3
-
-# Level 3 only, at 90 bpm
-python3 my_rudiments.py level3.mp3 --levels 3 --bpm 90
-
-# All three levels; each rudiment plays Level 1, then 2, then 3 with no pause
-python3 my_rudiments.py all-levels.mp3 --levels 1,2,3 --join-levels
-
-# Just the paradiddles (any rudiment whose name contains "paradiddle")
-python3 my_rudiments.py paradiddles.mp3 --only paradiddle
-
-# Rudiments 16, 17 and 18, each played 4 times, without the metronome click
-python3 my_rudiments.py diddles.mp3 --only 16,17,18 --passes 4 --no-click
-
-# Rudiments 10 through 20 (the rolls and paradiddles)
-python3 my_rudiments.py rolls.mp3 --only 10-20
-
-# Mix ranges, single numbers and names
-python3 my_rudiments.py mix.mp3 --only 1-5,20,ratamacue
-
-# Exaggerated accents: unaccented strokes very quiet
-python3 my_rudiments.py accents.mp3 --tap 0.08
-
-# Voice and drums more evenly balanced (the default puts the drums well in front)
-python3 my_rudiments.py practice.mp3 --drum-volume 0.8
-
-# Drums even further in front of the voice
-python3 my_rudiments.py practice.mp3 --drum-volume 2
-
-# Play straight through with no pauses and no voice, top to bottom
-python3 my_rudiments.py nonstop.mp3 --no-pauses --passes 1
-```
-
-### PDF sheet
-
-```bash
-# All Level 1, 2 and 3 notation as a printable PDF
-python3 my_rudiments.py --sheet rudiments.pdf --levels 1,2,3
-
-# A sheet of just the flam rudiments (every name containing "flam")
-python3 my_rudiments.py --sheet flams.pdf --only flam --levels 1,2,3
-```
-
-When you ask only for `--sheet` (or only for `--video`), no audio file is written.
 
 ### Video
 
 ```bash
-# Video plus a matching MP3
-python3 my_rudiments.py practice.mp3 --video practice.mp4
+# Levels 1 and 2 (the default), straight through
+python3 my_rudiments.py --output practice.mp4
 
-# Video only, all levels joined, at 80 bpm with each example played 4 times
-python3 my_rudiments.py --video practice-80bpm.mp4 --levels 1,2,3 --join-levels --bpm 80 --passes 4
+# All three levels at 80 bpm, each example played 4 times
+python3 my_rudiments.py --output practice-80bpm.mp4 --levels 1,2,3 --bpm 80 --passes 4
 
-# Video without the "Next up" panel, so the current score is bigger
-python3 my_rudiments.py --video practice.mp4 --no-next-up
+# With a spoken name and count-in before each rudiment
+python3 my_rudiments.py --output practice.mp4 --pauses
+
+# With pauses, but each rudiment's levels joined: one name and count-in, then Level 1, 2, 3
+python3 my_rudiments.py --output practice.mp4 --levels 1,2,3 --pauses --join-levels
+
+# Also keep the soundtrack as an MP3
+python3 my_rudiments.py --output practice.mp4 --save-audio practice.mp3
+
+# Without the "Next up" panel, so the current score is bigger
+python3 my_rudiments.py --output practice.mp4 --no-next-up
 
 # Show the notation from a PDF you have, instead of drawn notation
-python3 my_rudiments.py --video practice.mp4 --pdf ~/Documents/my-rudiment-notation.pdf
+python3 my_rudiments.py --output practice.mp4 --pdf ~/Documents/my-rudiment-notation.pdf
 
-# Everything at once
-python3 my_rudiments.py practice.mp3 --sheet practice.pdf --video practice.mp4 --levels 1,2,3
+# Video, soundtrack and printable sheet at once
+python3 my_rudiments.py --output practice.mp4 --save-audio practice.mp3 --sheet practice.pdf --levels 1,2,3
 ```
 
 Each example in the video has:
@@ -132,14 +111,65 @@ Each example in the video has:
 
 A full video of all levels takes a few minutes to render.
 
+### Audio
+
+```bash
+# Levels 1 and 2, with spoken names and count-ins
+python3 my_rudiments.py --audio-only --output practice.mp3
+
+# Level 3 only, at 90 bpm
+python3 my_rudiments.py --audio-only --output level3.mp3 --levels 3 --bpm 90
+
+# All three levels; each rudiment plays Level 1, then 2, then 3 with no pause between levels
+python3 my_rudiments.py --audio-only --output all-levels.mp3 --levels 1,2,3 --join-levels
+
+# Just the paradiddles (any rudiment whose name contains "paradiddle")
+python3 my_rudiments.py --audio-only --output paradiddles.mp3 --only paradiddle
+
+# Rudiments 16, 17 and 18, each played 4 times, without the metronome click
+python3 my_rudiments.py --audio-only --output diddles.mp3 --only 16,17,18 --passes 4 --no-click
+
+# Rudiments 10 through 20 (the rolls and paradiddles)
+python3 my_rudiments.py --audio-only --output rolls.mp3 --only 10-20
+
+# Mix ranges, single numbers and names
+python3 my_rudiments.py --audio-only --output mix.mp3 --only 1-5,20,ratamacue
+
+# Exaggerated accents: unaccented strokes very quiet
+python3 my_rudiments.py --audio-only --output accents.mp3 --tap 0.08
+
+# Voice and drums more evenly balanced (the default puts the drums well in front)
+python3 my_rudiments.py --audio-only --output practice.mp3 --drum-volume 0.8
+
+# Drums even further in front of the voice
+python3 my_rudiments.py --audio-only --output practice.mp3 --drum-volume 2
+
+# Straight through with no pauses and no voice
+python3 my_rudiments.py --audio-only --output nonstop.mp3 --no-pauses --passes 1
+```
+
+### PDF sheet
+
+```bash
+# All Level 1, 2 and 3 notation as a printable PDF (no video or audio)
+python3 my_rudiments.py --sheet rudiments.pdf --levels 1,2,3
+
+# A sheet of just the flam rudiments (every name containing "flam")
+python3 my_rudiments.py --sheet flams.pdf --only flam --levels 1,2,3
+```
+
+When you give only `--sheet` and no output file, just the sheet is made.
+
 ### Voice
+
+The voice is only heard with pauses: in `--audio-only` tracks, or videos made with `--pauses`.
 
 ```bash
 # Use a specific macOS voice
-python3 my_rudiments.py practice.mp3 --voice Samantha
+python3 my_rudiments.py --audio-only --output practice.mp3 --voice Samantha
 
 # Use a downloaded "Premium" voice (quote names with spaces)
-python3 my_rudiments.py practice.mp3 --voice "Ava (Premium)"
+python3 my_rudiments.py --audio-only --output practice.mp3 --voice "Ava (Premium)"
 ```
 
 To list your Mac's voices, run `say -v '?'`.
@@ -152,15 +182,17 @@ The Enhanced and Premium voices sound much more natural. To download one, open S
 
 | Option | What it does | Default |
 |---|---|---|
-| `output` | Audio file to write. A name ending in `.mp3` gives MP3; anything else gives WAV. | `rudiments.mp3` (only if no `--sheet`/`--video`) |
+| `--output FILE` (or `-o`) | File to write: a video (`.mp4`), or with `--audio-only` an audio file (`.mp3`, or `.wav`) | `rudiments.mp4` (`rudiments.mp3` with `--audio-only`); none if only `--sheet` is given |
+| `--audio-only` | Make an audio track instead of a video; it has pauses unless you add `--no-pauses` | off (makes a video) |
+| `--pauses` | Before each example, speak its name and count in | on for `--audio-only` |
+| `--no-pauses` | One count-in, then every example straight after the previous one, with no voice | on for videos |
+| `--save-audio FILE` | With a video, also save its soundtrack (`.mp3` or `.wav`) | |
 | `--rudiments FILE` | Pattern file to read | `rudiments.txt` in the current folder |
-| `--sheet OUT.pdf` | Write a PDF practice sheet | |
-| `--video OUT.mp4` | Write a notation video with a moving cursor | |
+| `--sheet OUT.pdf` | Also write a PDF practice sheet | |
 | `--pdf FILE` | A PDF of rudiment notation to show in the video instead of drawn notation | drawn notation |
 | `--levels LIST` | Levels to include, e.g. `1`, `1,2`, `2,3`, `1,2,3` | `1,2` |
 | `--only LIST` | Only these rudiments: comma-separated numbers, ranges and/or parts of names, e.g. `16,19`, `10-20` or `1-5,16,paradiddle` | all |
-| `--join-levels` | Play a rudiment's levels back to back with no pause: one spoken name and count-in, then each level | off |
-| `--no-pauses` | No pauses and no voice anywhere: one count-in, then every example straight after the previous one | off |
+| `--join-levels` | With pauses: play a rudiment's levels back to back, with one spoken name and count-in for the lot | off |
 | `--bpm BPM` | Tempo for everything; overrides any `bpm:` in the file | file's `bpm:`, else 70 |
 | `--passes N` | Times each example is played | 2 |
 | `--tap LEVEL` | Volume of unaccented strokes (0–1, accents are 1.0). Lower means louder-sounding accents | 0.15 |
@@ -168,13 +200,14 @@ The Enhanced and Premium voices sound much more natural. To download one, open S
 | `--drum-volume X` | Drums and click relative to the voice. Higher makes the drums louder against the voice; 0.8 is an even balance. The drums play as loud as the file allows, and above 1.0 the voice is turned down to get the balance, so turn your speaker up a little | 1.5 |
 | `--no-next-up` | In the video, leave out the "Next up" preview of the following example | shown |
 | `--no-click` | No metronome click under the examples (the count-in still plays) | |
-| `--voice NAME` | macOS voice for the spoken names | system voice |
+| `--voice NAME` | macOS voice for the spoken names (heard only with pauses) | system voice |
 
 Some notes on how the options work:
 
 - **Repeat signs:** the sample `rudiments.txt` has none; use `--passes` to set how many times each example plays. If you add repeat signs (`|: :|`) to a pattern, that part plays twice within each pass.
-- **`--join-levels`:** levels of the same rudiment are joined only when they appear in order (Level 1, then 2, then 3) under the same number. There's still a pause, a spoken name and a count-in between different rudiments.
-- **`--no-pauses`:** removes every pause, between levels and between rudiments, and the spoken names with them. The video still shows each rudiment's name, and the score switches the moment the next one starts. With `--no-pauses`, adding `--join-levels` makes no difference to the audio.
+- **`--join-levels`:** only matters with pauses. Levels of the same rudiment are joined only when they appear in order (Level 1, then 2, then 3) under the same number; there's still a pause, a spoken name and a count-in between different rudiments. Without pauses everything already plays back to back, so it makes no difference.
+- **File names:** the output file always goes after `--output`; a file name on its own is rejected. A video needs a video name like `practice.mp4`, and `--audio-only` needs an audio name like `practice.mp3`. Mixing them up gives an error that says what to change.
+- **Video-only options:** `--save-audio`, `--pdf` and `--no-next-up` can't be used with `--audio-only`.
 
 ---
 
@@ -286,10 +319,10 @@ pattern: @2 R> L R L R L
 
 ```bash
 # Audio, sheet and video of your own file
-python3 my_rudiments.py --rudiments mine.txt mine.mp3 --sheet mine.pdf --video mine.mp4
+python3 my_rudiments.py --rudiments mine.txt --output mine.mp4 --save-audio mine.mp3 --sheet mine.pdf
 
 # Just rudiment 41, Levels 1 and 2 back to back
-python3 my_rudiments.py --rudiments mine.txt --only 41 --levels 1,2 --join-levels pdd.mp3
+python3 my_rudiments.py --rudiments mine.txt --audio-only --only 41 --levels 1,2 --join-levels --output pdd.mp3
 ```
 
 Entries without a `number:` are spoken by name only ("Waltz singles. Level 1.").
@@ -301,7 +334,7 @@ Entries without a `number:` are spoken by name only ("Waltz singles. Level 1.").
 By default, the video shows notation drawn by the program. If you have a PDF of rudiment notation, you can point to it with `--pdf` and the video will show that PDF's notation instead, cropped from its pages, with the cursor following the notes.
 
 ```bash
-python3 my_rudiments.py --video practice.mp4 --pdf my-notation.pdf
+python3 my_rudiments.py --output practice.mp4 --pdf my-notation.pdf
 ```
 
 This works with a PDF laid out like a typical rudiment sheet:

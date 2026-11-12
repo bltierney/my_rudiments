@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Drum rudiment practice generator.
 
-Reads rudiment patterns from a text file (rudiments.txt by default) and makes:
-  * an MP3/WAV practice track: a spoken name, a count-in, then each example,
-  * a PDF practice sheet with the notation and sticking (--sheet),
-  * a video of the notation with a cursor that follows the audio (--video).
+Reads rudiment patterns from a text file (rudiments.txt in the current folder by default)
+and makes:
+  * a video (the default) of the notation with a cursor that follows the audio; the
+    examples play straight through, with the next one previewed at the bottom,
+  * an audio track instead with --audio-only: a spoken name and a count-in before each
+    example,
+  * a PDF practice sheet with the notation and sticking (--sheet).
 
 The notation is drawn with Verovio (pip install verovio); the PDF and video use
 PyMuPDF (pip install pymupdf) and Pillow. See rudiments.txt for the pattern format.
@@ -1151,24 +1154,36 @@ def cli():
     global TAP, GRACE, BPM_OVERRIDE, VOICE, DRUM_VOLUME
     import argparse
     p = argparse.ArgumentParser(
-        description="Make drum rudiment practice audio, a PDF sheet and a notation video "
-                    "from the patterns in a rudiments file.",
+        description="Make drum rudiment practice videos (the default), audio tracks "
+                    "(--audio-only) and PDF practice sheets (--sheet) from the patterns in a "
+                    "rudiments file.",
         epilog="Examples:\n"
-               "  python3 my_rudiments.py practice.mp3\n"
+               "  python3 my_rudiments.py --output practice.mp4\n"
+               "  python3 my_rudiments.py --output practice.mp4 --levels 1,2,3 --pauses\n"
+               "  python3 my_rudiments.py --audio-only --output practice.mp3\n"
+               "  python3 my_rudiments.py --audio-only --output nonstop.mp3 --no-pauses --passes 1\n"
                "  python3 my_rudiments.py --sheet rudiments.pdf --levels 1,2,3\n"
-               "  python3 my_rudiments.py practice.mp3 --video practice.mp4 --levels 1,2,3 --join-levels\n"
-               "  python3 my_rudiments.py --rudiments mine.txt --only 41 --video mine.mp4\n"
-               "  python3 my_rudiments.py practice.mp3 --video practice.mp4 --pdf notation.pdf\n"
-               "  python3 my_rudiments.py nonstop.mp3 --no-pauses --passes 1",
+               "  python3 my_rudiments.py --output practice.mp4 --save-audio practice.mp3 --pdf notation.pdf\n"
+               "  python3 my_rudiments.py --rudiments mine.txt --only 41 --output mine.mp4",
         formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("output", nargs="?",
-                   help="audio file to write; .mp3 is encoded with ffmpeg, anything else is WAV "
-                        "(default: rudiments.mp3 if no --sheet or --video is given)")
+    p.add_argument("-o", "--output", metavar="FILE",
+                   help="file to write: a video (.mp4) by default, or with --audio-only an "
+                        "audio file (.mp3, or .wav) (default: rudiments.mp4, or rudiments.mp3 "
+                        "with --audio-only; none if only --sheet is given)")
+    p.add_argument("--audio-only", action="store_true",
+                   help="make an audio track instead of a video; it has pauses (spoken names "
+                        "and count-ins) unless you add --no-pauses")
+    p.add_argument("--pauses", dest="pauses", action="store_true", default=None,
+                   help="before each example: speak its name, then count in (default for "
+                        "--audio-only)")
+    p.add_argument("--no-pauses", dest="pauses", action="store_false",
+                   help="no pauses and no voice: one count-in, then every example straight "
+                        "after the previous one (default for video)")
+    p.add_argument("--save-audio", metavar="FILE",
+                   help="with a video, also save its soundtrack (.mp3 or .wav)")
     p.add_argument("--rudiments", default="rudiments.txt", metavar="FILE",
                    help="pattern file (default: rudiments.txt in the current folder)")
-    p.add_argument("--sheet", metavar="OUT.pdf", help="write a PDF practice sheet of the notation")
-    p.add_argument("--video", metavar="OUT.mp4",
-                   help="write a video of the notation with a cursor following the audio")
+    p.add_argument("--sheet", metavar="OUT.pdf", help="also write a PDF practice sheet of the notation")
     p.add_argument("--pdf", metavar="FILE",
                    help="a PDF of rudiment notation with headings like '16. Single Paradiddle "
                         "Level 1': the video then shows the PDF's notation for every example it can "
@@ -1180,11 +1195,8 @@ def cli():
                    help="only these rudiments: comma-separated numbers, ranges and/or parts of "
                         "names, e.g. 16,19 or 10-20 or 1-5,16,paradiddle")
     p.add_argument("--join-levels", dest="join_levels", action="store_true",
-                   help="play a rudiment's levels back to back with no pause: one spoken name "
-                        "and count-in, then each level in turn (each played --passes times)")
-    p.add_argument("--no-pauses", dest="no_pauses", action="store_true",
-                   help="no pauses and no voice anywhere: one count-in, then every example "
-                        "straight after the previous one (the video still shows each name)")
+                   help="with pauses: play a rudiment's levels back to back, with one spoken "
+                        "name and count-in for the lot")
     p.add_argument("--bpm", type=float, default=None,
                    help="tempo for everything, overriding any bpm in the rudiments file "
                         f"(default: the file's bpm, else {DEFAULT_BPM})")
@@ -1215,14 +1227,31 @@ def cli():
         p.error("--levels can only use 1, 2 and 3")
     if not 0 < a.tap <= 1:
         p.error("--tap must be between 0 and 1")
-    if not (a.output or a.sheet or a.video):
-        a.output = "rudiments.mp3"
     if not 0.1 <= a.drum_volume <= 3:
         p.error("--drum-volume must be between 0.1 and 3")
-    TAP, VOICE, DRUM_VOLUME = a.tap, a.voice, a.drum_volume
-    GRACE = a.grace if a.grace is not None else round(a.tap * 0.52, 3)
     if a.bpm is not None and not 10 <= a.bpm <= 400:
         p.error("--bpm must be between 10 and 400")
+
+    # what to make: a video by default, an audio file with --audio-only
+    if a.output is None and not a.sheet:
+        a.output = "rudiments.mp3" if a.audio_only else "rudiments.mp4"
+    if a.output:
+        ext = os.path.splitext(a.output)[1].lower()
+        if a.audio_only and ext in (".mp4", ".mov", ".mkv", ".m4v"):
+            p.error(f"--audio-only makes an audio file; use a name like "
+                    f"--output {os.path.splitext(a.output)[0]}.mp3")
+        if not a.audio_only and ext in (".mp3", ".wav", ".aif", ".aiff", ".m4a"):
+            p.error(f"--output {a.output} looks like an audio file: add --audio-only for "
+                    f"audio, or use a .mp4 name for a video")
+    if a.audio_only and (a.save_audio or a.pdf or a.no_next_up):
+        p.error("--save-audio, --pdf and --no-next-up are for videos; leave out --audio-only")
+    pauses = a.audio_only if a.pauses is None else a.pauses
+    if a.join_levels and not pauses:
+        print("note: --join-levels has no effect without pauses (everything already plays "
+              "back to back)", file=sys.stderr)
+
+    TAP, VOICE, DRUM_VOLUME = a.tap, a.voice, a.drum_volume
+    GRACE = a.grace if a.grace is not None else round(a.tap * 0.52, 3)
     BPM_OVERRIDE = a.bpm
 
     examples = load_rudiments(a.rudiments)
@@ -1236,23 +1265,25 @@ def cli():
         lv = sorted(levels)
         write_sheet(chosen, a.sheet, "Drum Rudiments — Level" + ("s " if len(lv) > 1 else " ")
                     + ", ".join(map(str, lv)))
-    if a.output or a.video:
-        tmpdir = os.path.dirname(os.path.abspath(a.output or a.video))
+    if a.output:
+        tmpdir = os.path.dirname(os.path.abspath(a.output))
         os.makedirs(tmpdir, exist_ok=True)
-        render = render_audio_no_pauses if a.no_pauses else render_audio
+        render = render_audio if pauses else render_audio_no_pauses
         pcm, timeline = render(make_chains(chosen, a.join_levels), levels, a.passes,
                                not a.no_click, tmpdir)
-        if a.output:
+        if a.audio_only:
             write_audio(pcm, a.output)
-        if a.video:
-            book = None
-            if a.pdf and not os.path.exists(a.pdf):
-                print(f"note: {a.pdf} not found; drawing the notation instead", file=sys.stderr)
-            elif a.pdf:
-                print(f"using the notation in {a.pdf}", file=sys.stderr)
-                book = book_layouts(a.pdf, chosen, examples)
-            set_layout(not a.no_next_up)
-            render_video(timeline, pcm, a.video, book)
+            return
+        if a.save_audio:
+            write_audio(pcm, a.save_audio)
+        book = None
+        if a.pdf and not os.path.exists(a.pdf):
+            print(f"note: {a.pdf} not found; drawing the notation instead", file=sys.stderr)
+        elif a.pdf:
+            print(f"using the notation in {a.pdf}", file=sys.stderr)
+            book = book_layouts(a.pdf, chosen, examples)
+        set_layout(not a.no_next_up)
+        render_video(timeline, pcm, a.output, book)
 
 if __name__ == "__main__":
     cli()
