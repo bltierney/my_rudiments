@@ -64,7 +64,7 @@ python3 my_rudiments.py practice.mp3
 python3 my_rudiments.py level3.mp3 --levels 3 --bpm 90
 
 # All three levels; each rudiment plays Level 1, then 2, then 3 with no pause
-python3 my_rudiments.py all-levels.mp3 --levels 1,2,3 --seamless
+python3 my_rudiments.py all-levels.mp3 --levels 1,2,3 --join-levels
 
 # Just the paradiddles (any rudiment whose name contains "paradiddle")
 python3 my_rudiments.py paradiddles.mp3 --only paradiddle
@@ -76,7 +76,7 @@ python3 my_rudiments.py diddles.mp3 --only 16,17,18 --passes 4 --no-click
 python3 my_rudiments.py accents.mp3 --tap 0.08
 
 # Play straight through with no pauses and no voice, top to bottom
-python3 my_rudiments.py nonstop.mp3 --continuous --passes 1
+python3 my_rudiments.py nonstop.mp3 --no-pauses --passes 1
 ```
 
 ### PDF sheet
@@ -97,8 +97,8 @@ When you ask only for `--sheet` (or only for `--video`), no audio file is writte
 # Video plus a matching MP3
 python3 my_rudiments.py practice.mp3 --video practice.mp4
 
-# Video only, all levels, seamless, at 80 bpm with each example played 4 times
-python3 my_rudiments.py --video practice-80bpm.mp4 --levels 1,2,3 --seamless --bpm 80 --passes 4
+# Video only, all levels joined, at 80 bpm with each example played 4 times
+python3 my_rudiments.py --video practice-80bpm.mp4 --levels 1,2,3 --join-levels --bpm 80 --passes 4
 
 # Video without the "Next up" panel, so the current score is bigger
 python3 my_rudiments.py --video practice.mp4 --no-next-up
@@ -116,7 +116,7 @@ Each example in the video has:
 - a "1 2 3 4" count-in indicator,
 - a "Pass 1 of 2 · 70 bpm" status line,
 - an orange cursor that moves from note to note in time with the audio,
-- a "Next up" panel at the bottom showing the next example's title and first line of music (the next level, during a `--seamless` take). `--no-next-up` leaves it out and gives the current score more room.
+- a "Next up" panel at the bottom showing the next example's title and first line of music (the next level, during a `--join-levels` take). `--no-next-up` leaves it out and gives the current score more room.
 
 A full video of all levels takes a few minutes to render.
 
@@ -147,8 +147,8 @@ The Enhanced and Premium voices sound much more natural. To download one, open S
 | `--pdf FILE` | A PDF of rudiment notation to show in the video instead of drawn notation | drawn notation |
 | `--levels LIST` | Levels to include, e.g. `1`, `1,2`, `2,3`, `1,2,3` | `1,2` |
 | `--only LIST` | Only these rudiments: numbers and/or parts of names, e.g. `16,19` or `paradiddle` | all |
-| `--seamless` | Play a rudiment's levels back to back with no pause: one spoken name and count-in, then each level | off |
-| `--continuous` | No pauses and no voice: one count-in, then every rudiment straight after the previous one | off |
+| `--join-levels` | Play a rudiment's levels back to back with no pause: one spoken name and count-in, then each level | off |
+| `--no-pauses` | No pauses and no voice anywhere: one count-in, then every example straight after the previous one | off |
 | `--bpm BPM` | Tempo for everything; overrides any `bpm:` in the file | file's `bpm:`, else 70 |
 | `--passes N` | Times each example is played | 2 |
 | `--tap LEVEL` | Volume of unaccented strokes (0–1, accents are 1.0). Lower means louder-sounding accents | 0.15 |
@@ -160,8 +160,8 @@ The Enhanced and Premium voices sound much more natural. To download one, open S
 Some notes on how the options work:
 
 - **Repeat signs:** the sample `rudiments.txt` has none; use `--passes` to set how many times each example plays. If you add repeat signs (`|: :|`) to a pattern, that part plays twice within each pass.
-- **`--seamless`:** levels of the same rudiment are joined only when they appear in order (Level 1, then 2, then 3) under the same number.
-- **`--continuous`:** the video still shows each rudiment's name, and the score switches the moment the next rudiment starts.
+- **`--join-levels`:** levels of the same rudiment are joined only when they appear in order (Level 1, then 2, then 3) under the same number. There's still a pause, a spoken name and a count-in between different rudiments.
+- **`--no-pauses`:** removes every pause, between levels and between rudiments, and the spoken names with them. The video still shows each rudiment's name, and the score switches the moment the next one starts. With `--no-pauses`, adding `--join-levels` makes no difference to the audio.
 
 ---
 
@@ -179,7 +179,7 @@ pattern: @4 R> L R R L> R L L R> L R R L> R L L
 | Key | Meaning |
 |---|---|
 | `[Name]` | The rudiment's name, as spoken and printed. |
-| `number:` | Optional. The rudiment's number; used for the spoken name, `--only`, `--seamless`, and finding it in a `--pdf` file. |
+| `number:` | Optional. The rudiment's number; used for the spoken name, `--only`, `--join-levels`, and finding it in a `--pdf` file. |
 | `level:` | `1`, `2` or `3`, or a list like `2,3`. Default `1`. |
 | `time:` | Optional. Beats per bar over 4, e.g. `3/4`. Default `4/4`. |
 | `bpm:` | Optional. Tempo for this example only. |
@@ -226,7 +226,7 @@ Each pattern must add up to whole bars. If it doesn't, the script says which exa
 
 The `bpm: 70` line near the top of `rudiments.txt` sets the tempo for the whole file. You can override it in three ways:
 
-- **For one example:** add a `bpm:` line to that entry. Each level is a separate entry, so different levels can have different tempos; with `--seamless`, the tempo changes at the level boundary.
+- **For one example:** add a `bpm:` line to that entry. Each level is a separate entry, so different levels can have different tempos; with `--join-levels`, the tempo changes at the level boundary.
 - **For everything, one time:** use `--bpm` on the command line. It overrides every tempo in the file.
 - **No tempo set anywhere:** the tempo is 70.
 
@@ -276,7 +276,7 @@ pattern: @2 R> L R L R L
 python3 my_rudiments.py --rudiments mine.txt mine.mp3 --sheet mine.pdf --video mine.mp4
 
 # Just rudiment 41, Levels 1 and 2 back to back
-python3 my_rudiments.py --rudiments mine.txt --only 41 --levels 1,2 --seamless pdd.mp3
+python3 my_rudiments.py --rudiments mine.txt --only 41 --levels 1,2 --join-levels pdd.mp3
 ```
 
 Entries without a `number:` are spoken by name only ("Waltz singles. Level 1.").

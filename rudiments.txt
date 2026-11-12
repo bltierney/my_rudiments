@@ -3,7 +3,7 @@
 # Each example starts with its name in square brackets, followed by key: value lines.
 #
 #   [Name]            the rudiment's name (spoken and printed)
-#   number: 16        optional; examples with the same number are grouped for --seamless
+#   number: 16        optional; examples with the same number are grouped for --join-levels
 #   level: 1          1, 2 or 3 (or a list like 2,3); default 1
 #   time: 4/4         optional; beats per bar over 4 (default 4/4)
 #   bpm: 80           optional; tempo for this example (default: the file-wide bpm below)

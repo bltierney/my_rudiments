@@ -318,12 +318,12 @@ def select(examples, levels, only):
         out.append(ex)
     return out
 
-def make_chains(examples, seamless):
+def make_chains(examples, join_levels):
     """Takes: lists of examples played as one take (one spoken name and count-in,
     then the examples back to back with no gap)."""
     chains = []
     for ex in examples:
-        if seamless and chains:
+        if join_levels and chains:
             prev = chains[-1][-1]
             if prev.group == ex.group and min(ex.levels) >= max(prev.levels):
                 chains[-1].append(ex)
@@ -383,7 +383,7 @@ def render_audio(chains, levels, passes, click, tmpdir):
     print(f"{len(timeline)} takes, {len(audio) / SR / 60:.1f} min", file=sys.stderr)
     return (audio * 32767).astype(np.int16), timeline
 
-def render_audio_continuous(chains, levels, passes, click, tmpdir):
+def render_audio_no_pauses(chains, levels, passes, click, tmpdir):
     """Everything back to back, no voice: one count-in at the start, then each take
     straight after the previous one."""
     takes = []
@@ -1129,10 +1129,10 @@ def cli():
         epilog="Examples:\n"
                "  python3 my_rudiments.py practice.mp3\n"
                "  python3 my_rudiments.py --sheet rudiments.pdf --levels 1,2,3\n"
-               "  python3 my_rudiments.py practice.mp3 --video practice.mp4 --levels 1,2,3 --seamless\n"
+               "  python3 my_rudiments.py practice.mp3 --video practice.mp4 --levels 1,2,3 --join-levels\n"
                "  python3 my_rudiments.py --rudiments mine.txt --only 41 --video mine.mp4\n"
                "  python3 my_rudiments.py practice.mp3 --video practice.mp4 --pdf notation.pdf\n"
-               "  python3 my_rudiments.py nonstop.mp3 --continuous --passes 1",
+               "  python3 my_rudiments.py nonstop.mp3 --no-pauses --passes 1",
         formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("output", nargs="?",
                    help="audio file to write; .mp3 is encoded with ffmpeg, anything else is WAV "
@@ -1152,12 +1152,12 @@ def cli():
     p.add_argument("--only", metavar="LIST",
                    help="only these rudiments: comma-separated numbers and/or parts of names, "
                         "e.g. 16,19 or paradiddle")
-    p.add_argument("--seamless", action="store_true",
+    p.add_argument("--join-levels", dest="join_levels", action="store_true",
                    help="play a rudiment's levels back to back with no pause: one spoken name "
                         "and count-in, then each level in turn (each played --passes times)")
-    p.add_argument("--continuous", action="store_true",
-                   help="no pauses and no voice: one count-in, then every rudiment straight "
-                        "after the previous one (the video still shows each name)")
+    p.add_argument("--no-pauses", dest="no_pauses", action="store_true",
+                   help="no pauses and no voice anywhere: one count-in, then every example "
+                        "straight after the previous one (the video still shows each name)")
     p.add_argument("--bpm", type=float, default=None,
                    help="tempo for everything, overriding any bpm in the rudiments file "
                         f"(default: the file's bpm, else {DEFAULT_BPM})")
@@ -1207,8 +1207,8 @@ def cli():
     if a.output or a.video:
         tmpdir = os.path.dirname(os.path.abspath(a.output or a.video))
         os.makedirs(tmpdir, exist_ok=True)
-        render = render_audio_continuous if a.continuous else render_audio
-        pcm, timeline = render(make_chains(chosen, a.seamless), levels, a.passes,
+        render = render_audio_no_pauses if a.no_pauses else render_audio
+        pcm, timeline = render(make_chains(chosen, a.join_levels), levels, a.passes,
                                not a.no_click, tmpdir)
         if a.output:
             write_audio(pcm, a.output)
