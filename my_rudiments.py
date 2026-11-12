@@ -309,8 +309,12 @@ def select(examples, levels, only):
         if only:
             ok = False
             for item in only:
+                rng = re.fullmatch(r"(\d+)\s*-\s*(\d+)", item)
                 if item.isdigit():
                     ok |= ex.number == int(item)
+                elif rng:                                    # a range of numbers: 10-20
+                    lo, hi = sorted((int(rng.group(1)), int(rng.group(2))))
+                    ok |= ex.number is not None and lo <= ex.number <= hi
                 else:
                     ok |= item.lower() in ex.name.lower()
             if not ok:
@@ -339,9 +343,32 @@ def chain_label(chain, levels):
     num = f"Number {chain[0].number}. " if chain[0].number is not None else ""
     return f"{num}{chain[0].name}. Levels {words}."
 
+DRUM_VOLUME = 1.5  # --drum-volume: drums relative to the voice (0.8 = the original balance)
+
+def mix(drums, voice=None):
+    """Final mix. --drum-volume sets the drums' level relative to the voice: 0.8 is the
+    original balance, each step up makes the drums louder against the voice. The drums
+    go as loud as the file allows without distorting; when the balance asks for more
+    than that, the voice is turned down instead (turn up your speaker to compensate)."""
+    ref = drums if voice is None else drums + voice[:, None]
+    f = 0.893 / (np.max(np.abs(ref)) + 1e-12)   # the original single-gain level
+    gd, gv = f * 1.25 * DRUM_VOLUME, f
+    top = f * 1.25                               # the loudest the drums go (with rounding below)
+    if gd > top:                                 # no room left: turn the voice down instead
+        gd, gv = top, gv * top / gd
+    x = drums * gd
+    t = 0.75                                     # round off the few hits above this smoothly
+    a = np.abs(x)
+    over = a > t
+    a[over] = t + (0.98 - t) * np.tanh((a[over] - t) / (0.98 - t))
+    x = np.sign(x) * a
+    if voice is not None:                        # the voice never overlaps the drums
+        x = x + (voice * gv)[:, None]
+    return np.clip(x, -0.99, 0.99)
+
 def render_audio(chains, levels, passes, click, tmpdir):
     tmp = os.path.join(tmpdir, "_tts.wav")
-    segs, timeline, pos = [], [], 0
+    segs, vsegs, timeline, pos = [], [], [], 0
     for chain in chains:
         label = chain_label(chain, levels)
         parts = []
@@ -355,7 +382,8 @@ def render_audio(chains, levels, passes, click, tmpdir):
         voice = tts(spoken(label), tmp)
         total = len(voice) / SR + 0.5 + bar + play_len + 1.5
         buf = np.zeros((int(total * SR) + SR, 2))
-        buf[: len(voice), 0] += voice; buf[: len(voice), 1] += voice
+        vbuf = np.zeros(len(buf))                # the voice is mixed in at the end
+        vbuf[: len(voice)] += voice
         t = len(voice) / SR + 0.5
         for b in range(4):  # count-in bar
             place(buf, CLICK_HI if b == 0 else CLICK_LO, t + b * beat0, 0.35, 0)
@@ -371,6 +399,7 @@ def render_audio(chains, levels, passes, click, tmpdir):
                         place(buf, CLICK_HI if b % bpb == 0 else CLICK_LO, ps + b * beat, 0.12, 0)
                 ps += part["length"] * beat
         segs.append(buf[: int(total * SR)])
+        vsegs.append(vbuf[: int(total * SR)])
         timeline.append(dict(label=label, parts=parts, count=pos / SR + t, play=pos / SR + start,
                              count_beat=beat0,
                              end=(pos + int(total * SR)) / SR, passes=passes))
@@ -378,8 +407,7 @@ def render_audio(chains, levels, passes, click, tmpdir):
         print(f"{label:70s} {passes * sum(p['length'] / p['ex'].beats_per_bar for p in parts):.0f} bars", file=sys.stderr)
     if os.path.exists(tmp):
         os.remove(tmp)
-    audio = np.concatenate(segs)
-    audio /= np.max(np.abs(audio)) * 1.12
+    audio = mix(np.concatenate(segs), np.concatenate(vsegs))
     print(f"{len(timeline)} takes, {len(audio) / SR / 60:.1f} min", file=sys.stderr)
     return (audio * 32767).astype(np.int16), timeline
 
@@ -418,8 +446,7 @@ def render_audio_no_pauses(chains, levels, passes, click, tmpdir):
                              play=take_start, end=ps))
         print(f"{label:70s} {passes * sum(p['length'] / p['ex'].beats_per_bar for p in parts):.0f} bars", file=sys.stderr)
     timeline[-1]["end"] = total
-    audio = drums[: int(total * SR)]
-    audio /= np.max(np.abs(audio)) * 1.12
+    audio = mix(drums[: int(total * SR)])
     print(f"{len(timeline)} takes, {len(audio) / SR / 60:.1f} min, no pauses", file=sys.stderr)
     return (audio * 32767).astype(np.int16), timeline
 
@@ -1121,7 +1148,7 @@ def render_video(timeline, pcm, out_mp4, book=None):
 
 # ======================= command line =======================
 def cli():
-    global TAP, GRACE, BPM_OVERRIDE, VOICE
+    global TAP, GRACE, BPM_OVERRIDE, VOICE, DRUM_VOLUME
     import argparse
     p = argparse.ArgumentParser(
         description="Make drum rudiment practice audio, a PDF sheet and a notation video "
@@ -1150,8 +1177,8 @@ def cli():
                    help="comma-separated levels to include, e.g. 1 or 1,2 or 1,2,3 or 2,3 "
                         "(default: %(default)s)")
     p.add_argument("--only", metavar="LIST",
-                   help="only these rudiments: comma-separated numbers and/or parts of names, "
-                        "e.g. 16,19 or paradiddle")
+                   help="only these rudiments: comma-separated numbers, ranges and/or parts of "
+                        "names, e.g. 16,19 or 10-20 or 1-5,16,paradiddle")
     p.add_argument("--join-levels", dest="join_levels", action="store_true",
                    help="play a rudiment's levels back to back with no pause: one spoken name "
                         "and count-in, then each level in turn (each played --passes times)")
@@ -1168,6 +1195,9 @@ def cli():
                         "Lower = louder-sounding accents (default: %(default)s)")
     p.add_argument("--grace", type=float, default=None, metavar="LEVEL",
                    help="volume of flam/drag grace notes, 0-1 (default: about half of --tap)")
+    p.add_argument("--drum-volume", type=float, default=DRUM_VOLUME, metavar="X",
+                   help="drums and click relative to the voice: higher = drums louder "
+                        "against the voice; 0.8 is the original balance (default: %(default)s)")
     p.add_argument("--no-next-up", action="store_true",
                    help="in the video, leave out the 'Next up' preview of the following "
                         "example (gives the current score more room)")
@@ -1187,7 +1217,9 @@ def cli():
         p.error("--tap must be between 0 and 1")
     if not (a.output or a.sheet or a.video):
         a.output = "rudiments.mp3"
-    TAP, VOICE = a.tap, a.voice
+    if not 0.1 <= a.drum_volume <= 3:
+        p.error("--drum-volume must be between 0.1 and 3")
+    TAP, VOICE, DRUM_VOLUME = a.tap, a.voice, a.drum_volume
     GRACE = a.grace if a.grace is not None else round(a.tap * 0.52, 3)
     if a.bpm is not None and not 10 <= a.bpm <= 400:
         p.error("--bpm must be between 10 and 400")

@@ -72,8 +72,20 @@ python3 my_rudiments.py paradiddles.mp3 --only paradiddle
 # Rudiments 16, 17 and 18, each played 4 times, without the metronome click
 python3 my_rudiments.py diddles.mp3 --only 16,17,18 --passes 4 --no-click
 
+# Rudiments 10 through 20 (the rolls and paradiddles)
+python3 my_rudiments.py rolls.mp3 --only 10-20
+
+# Mix ranges, single numbers and names
+python3 my_rudiments.py mix.mp3 --only 1-5,20,ratamacue
+
 # Exaggerated accents: unaccented strokes very quiet
 python3 my_rudiments.py accents.mp3 --tap 0.08
+
+# Voice and drums more evenly balanced (the default puts the drums well in front)
+python3 my_rudiments.py practice.mp3 --drum-volume 0.8
+
+# Drums even further in front of the voice
+python3 my_rudiments.py practice.mp3 --drum-volume 2
 
 # Play straight through with no pauses and no voice, top to bottom
 python3 my_rudiments.py nonstop.mp3 --no-pauses --passes 1
@@ -146,13 +158,14 @@ The Enhanced and Premium voices sound much more natural. To download one, open S
 | `--video OUT.mp4` | Write a notation video with a moving cursor | |
 | `--pdf FILE` | A PDF of rudiment notation to show in the video instead of drawn notation | drawn notation |
 | `--levels LIST` | Levels to include, e.g. `1`, `1,2`, `2,3`, `1,2,3` | `1,2` |
-| `--only LIST` | Only these rudiments: numbers and/or parts of names, e.g. `16,19` or `paradiddle` | all |
+| `--only LIST` | Only these rudiments: comma-separated numbers, ranges and/or parts of names, e.g. `16,19`, `10-20` or `1-5,16,paradiddle` | all |
 | `--join-levels` | Play a rudiment's levels back to back with no pause: one spoken name and count-in, then each level | off |
 | `--no-pauses` | No pauses and no voice anywhere: one count-in, then every example straight after the previous one | off |
 | `--bpm BPM` | Tempo for everything; overrides any `bpm:` in the file | file's `bpm:`, else 70 |
 | `--passes N` | Times each example is played | 2 |
 | `--tap LEVEL` | Volume of unaccented strokes (0–1, accents are 1.0). Lower means louder-sounding accents | 0.15 |
 | `--grace LEVEL` | Volume of flam and drag grace notes (0–1) | about half of `--tap` |
+| `--drum-volume X` | Drums and click relative to the voice. Higher makes the drums louder against the voice; 0.8 is an even balance. The drums play as loud as the file allows, and above 1.0 the voice is turned down to get the balance, so turn your speaker up a little | 1.5 |
 | `--no-next-up` | In the video, leave out the "Next up" preview of the following example | shown |
 | `--no-click` | No metronome click under the examples (the count-in still plays) | |
 | `--voice NAME` | macOS voice for the spoken names | system voice |
