@@ -31,7 +31,7 @@ You also need two programs:
   - macOS: nothing to install; the built-in `say` command is used.
   - Linux: `sudo apt install espeak-ng`
 
-Keep `my_rudiments.py` and `rudiments.txt` in the same folder.
+Run the program from the folder that holds your `rudiments.txt`; that's where it looks by default. `my_rudiments.py` itself can live anywhere, e.g. `python3 ~/Claude/my_rudiments/my_rudiments.py practice.mp3`. To use a file somewhere else, pass `--rudiments FILE`.
 
 
 ---
@@ -100,6 +100,9 @@ python3 my_rudiments.py practice.mp3 --video practice.mp4
 # Video only, all levels, seamless, at 80 bpm with each example played 4 times
 python3 my_rudiments.py --video practice-80bpm.mp4 --levels 1,2,3 --seamless --bpm 80 --passes 4
 
+# Video without the "Next up" panel, so the current score is bigger
+python3 my_rudiments.py --video practice.mp4 --no-next-up
+
 # Show the notation from a PDF you have, instead of drawn notation
 python3 my_rudiments.py --video practice.mp4 --pdf ~/Documents/my-rudiment-notation.pdf
 
@@ -112,7 +115,8 @@ Each example in the video has:
 - its name across the top,
 - a "1 2 3 4" count-in indicator,
 - a "Pass 1 of 2 · 70 bpm" status line,
-- an orange cursor that moves from note to note in time with the audio.
+- an orange cursor that moves from note to note in time with the audio,
+- a "Next up" panel at the bottom showing the next example's title and first line of music (the next level, during a `--seamless` take). `--no-next-up` leaves it out and gives the current score more room.
 
 A full video of all levels takes a few minutes to render.
 
@@ -137,7 +141,7 @@ The Enhanced and Premium voices sound much more natural. To download one, open S
 | Option | What it does | Default |
 |---|---|---|
 | `output` | Audio file to write. A name ending in `.mp3` gives MP3; anything else gives WAV. | `rudiments.mp3` (only if no `--sheet`/`--video`) |
-| `--rudiments FILE` | Pattern file to read | `rudiments.txt` next to the script |
+| `--rudiments FILE` | Pattern file to read | `rudiments.txt` in the current folder |
 | `--sheet OUT.pdf` | Write a PDF practice sheet | |
 | `--video OUT.mp4` | Write a notation video with a moving cursor | |
 | `--pdf FILE` | A PDF of rudiment notation to show in the video instead of drawn notation | drawn notation |
@@ -149,6 +153,7 @@ The Enhanced and Premium voices sound much more natural. To download one, open S
 | `--passes N` | Times each example is played | 2 |
 | `--tap LEVEL` | Volume of unaccented strokes (0–1, accents are 1.0). Lower means louder-sounding accents | 0.15 |
 | `--grace LEVEL` | Volume of flam and drag grace notes (0–1) | about half of `--tap` |
+| `--no-next-up` | In the video, leave out the "Next up" preview of the following example | shown |
 | `--no-click` | No metronome click under the examples (the count-in still plays) | |
 | `--voice NAME` | macOS voice for the spoken names | system voice |
 

@@ -109,6 +109,9 @@ def load_rudiments(path):
                                     book))
         except ValueError as e:
             sys.exit(f"{cur['where']} [{cur['name']}]: {e}")
+    if not os.path.exists(path):
+        sys.exit(f"Can't find the rudiments file {path!r}. Run this from the folder that has "
+                 "rudiments.txt, or point to one with --rudiments FILE.")
     with open(path, encoding="utf-8") as f:
         for n, raw in enumerate(f, 1):
             line = raw.split("#", 1)[0].rstrip()
@@ -652,6 +655,17 @@ def write_sheet(examples, out, title):
 
 # ======================= video =======================
 W, H, FPS = 1920, 1080, 30
+# frame layout; set_layout() switches between the full-size score and score + "Next up" panel
+TITLE_Y, SCORE_TOP, SCORE_H, STATUS_Y = 70, 160, H - 300, H - 150
+NEXT_UP = False
+
+def set_layout(next_up):
+    global TITLE_Y, SCORE_TOP, SCORE_H, STATUS_Y, NEXT_UP
+    NEXT_UP = next_up
+    if next_up:
+        TITLE_Y, SCORE_TOP, SCORE_H, STATUS_Y = 55, 105, 560, 672
+    else:
+        TITLE_Y, SCORE_TOP, SCORE_H, STATUS_Y = 70, 160, H - 300, H - 150
 BG = (250, 248, 243)
 CURSOR = np.array([230, 90, 40], np.float32)
 
@@ -672,7 +686,7 @@ def _draw_title(img, ex):
     title, size = ex.label.rstrip("."), 54
     while size > 24 and _font(size, True).getlength(title) > W - 80:
         size -= 2
-    ImageDraw.Draw(img).text((W // 2, 70), title, font=_font(size, True),
+    ImageDraw.Draw(img).text((W // 2, TITLE_Y), title, font=_font(size, True),
                              fill=(30, 30, 30), anchor="mm")
 
 def _compose(ex, fonts):
@@ -682,11 +696,11 @@ def _compose(ex, fonts):
     eng = Engraving(ex, page_width=1500 * bpl, bars_per_line=bpl)
     img = Image.new("RGB", (W, H), BG)
     _draw_title(img, ex)
-    max_w, max_h = W - 120, H - 300
+    max_w, max_h = W - 120, SCORE_H
     zoom = min(max_w / eng.w, max_h / eng.h, 2.2)
     sc = eng.raster(zoom)
     x0 = (W - sc.shape[1]) // 2
-    y0 = 160 + (max_h - sc.shape[0]) // 2
+    y0 = SCORE_TOP + (max_h - sc.shape[0]) // 2
     frame = np.asarray(img).copy()
     frame[y0:y0 + sc.shape[0], x0:x0 + sc.shape[1]] = sc
     sp = eng.staff_space * zoom
@@ -776,6 +790,24 @@ def _book_headings(doc):
     heads.sort(key=lambda h: (h["page"], h["y"], h["x"]))
     return heads
 
+def _erase_text(g, pg):
+    """Erase the page's printed text (headings), but only the ink that lies entirely inside
+    a word's box: a word's box is taller than its letters and can overlap the sticking
+    above it or the accents below it, which must stay."""
+    from scipy import ndimage
+    k = DPI / 72
+    lab, _ = ndimage.label(g < 245)                 # include the letters' soft grey edges
+    objs = ndimage.find_objects(lab)
+    for x0, y0, x1, y1, *_ in pg.get_text("words"):
+        Y0, Y1 = max(0, int(y0 * k) - 3), int(y1 * k) + 3
+        X0, X1 = max(0, int(x0 * k) - 3), int(x1 * k) + 3
+        for v in np.unique(lab[Y0:Y1, X0:X1]):
+            if v == 0:
+                continue
+            sl = objs[v - 1]
+            if sl[0].start >= Y0 and sl[0].stop <= Y1 and sl[1].start >= X0 and sl[1].stop <= X1:
+                g[sl][lab[sl] == v] = 255
+
 def book_layouts(pdf_path, examples, all_examples):
     """{id(example): layout} for the examples whose notation can be found in the PDF.
     Each example is matched to a heading by its number and level (in order, for repeats),
@@ -809,9 +841,7 @@ def book_layouts(pdf_path, examples, all_examples):
             pix = doc[pn - 1].get_pixmap(dpi=DPI, colorspace=fitz.csGRAY)
             g = np.frombuffer(pix.samples, np.uint8).reshape(pix.h, pix.w).copy()
             st = _book_staves(g)
-            k = DPI / 72                      # blank the printed headings; the video has its own
-            for x0, y0, x1, y1, *_ in doc[pn - 1].get_text("words"):
-                g[max(0, int(y0 * k) - 3):int(y1 * k) + 3, max(0, int(x0 * k) - 3):int(x1 * k) + 3] = 255
+            _erase_text(g, doc[pn - 1])      # the video prints its own titles
             cache[pn] = (g, st)
         return cache[pn]
     # match the file's examples to headings: k-th example with a number+levels -> k-th heading
@@ -922,10 +952,10 @@ def _compose_book(ex, lay, fonts):
             for v in set(edge[edge > 0].tolist()):
                 c[lab == v] = 255
         crops.append(c); geo0.append((y0, r["x0"]))
-    max_w, max_h = W - 120, H - 300
+    max_w, max_h = W - 120, SCORE_H
     total_h = sum(c.shape[0] for c in crops) + 30 * (len(crops) - 1)
     scale = min(max_w / max(c.shape[1] for c in crops), max_h / total_h, 1.6)
-    y = 160 + (max_h - total_h * scale) / 2
+    y = SCORE_TOP + (max_h - total_h * scale) / 2
     rects = []
     for c, (cy0, cx0), r in zip(crops, geo0, lay["rows"]):
         im = Image.fromarray(c).resize((int(c.shape[1] * scale), int(c.shape[0] * scale)),
@@ -965,7 +995,67 @@ def render_video(timeline, pcm, out_mp4, book=None):
             else:
                 status_cache[key] = patch("", fonts["info"], (0, 0, 0))
         return status_cache[key]
-    SX, SY = (W - 900) // 2, H - 150
+    SX, SY = (W - 900) // 2, STATUS_Y
+
+    def compose(ex):
+        lay = (book or {}).get(id(ex))
+        return _compose_book(ex, lay, fonts) if lay else _compose(ex, fonts)
+
+    # "Next up" panel: the following example's title and a small, faded copy of its score
+    order = [(n, k) for n, it in enumerate(timeline) for k in range(len(it["parts"]))]
+    following = {order[j]: order[j + 1] for j in range(len(order) - 1)}
+    PANEL_Y, PREV_W, PREV_H = 812, W - 320, H - 885
+    label_font, preview_cache = _font(34, True), {}
+    def preview(ex):
+        if id(ex) not in preview_cache:
+            fr = compose(ex)[0][SCORE_TOP:SCORE_TOP + SCORE_H]
+            mask = np.abs(fr.astype(int) - BG).sum(axis=2) > 60
+            ink = np.where(mask)
+            fr, mask = (fr[ink[0].min():ink[0].max() + 1, ink[1].min():ink[1].max() + 1],
+                        mask[ink[0].min():ink[0].max() + 1, ink[1].min():ink[1].max() + 1])
+            # just the first line of music: find where the second staff starts, then cut
+            # in the widest empty band above it (between the first line's sticking and the
+            # second line's accents)
+            dark = fr.astype(int).sum(axis=2) < 300
+            grey = fr.astype(int).sum(axis=2) < 600       # thin staff lines render grey
+            lines = np.where(grey.sum(axis=1) > 0.5 * fr.shape[1])[0]
+            if len(lines) > 1:
+                d = np.diff(lines)
+                sp = np.median(d[d > 2]) if (d > 2).any() else 10
+                big = np.where(d > 4 * sp)[0]
+                if len(big):
+                    y_end, y_next = lines[big[0]], lines[big[0] + 1]
+                    blank = dark[y_end + 1:y_next].sum(axis=1) < 3
+                    best, run, at = 0, 0, None
+                    for y, b_ in enumerate(blank):
+                        run = run + 1 if b_ else 0
+                        if run > best:
+                            best, at = run, y_end + 1 + y - run // 2
+                    if at:
+                        fr = fr[:at]
+            im = Image.fromarray(fr)
+            z = min(PREV_W / im.width, PREV_H / im.height)
+            im = im.resize((max(1, int(im.width * z)), max(1, int(im.height * z))), Image.LANCZOS)
+            a = np.asarray(im).astype(np.float32)
+            preview_cache[id(ex)] = (a * 0.6 + np.array(BG, np.float32) * 0.4).astype(np.uint8)
+        return preview_cache[id(ex)]
+    def add_panel(frame, nxt):
+        img = Image.fromarray(frame)
+        dr = ImageDraw.Draw(img)
+        dr.line([(80, PANEL_Y), (W - 80, PANEL_Y)], fill=(215, 210, 200), width=2)
+        if nxt is None:
+            dr.text((W // 2, PANEL_Y + 40), "Last one", font=label_font, fill=(150, 150, 150), anchor="mm")
+            return np.asarray(img).copy()
+        ex = timeline[nxt[0]]["parts"][nxt[1]]["ex"]
+        text, size = "Next up:  " + ex.label.rstrip("."), 34
+        while size > 20 and _font(size, True).getlength(text) > W - 160:
+            size -= 2
+        dr.text((W // 2, PANEL_Y + 34), text, font=_font(size, True), fill=(120, 120, 120), anchor="mm")
+        out = np.asarray(img).copy()
+        pv = preview(ex)
+        x0, y0 = (W - pv.shape[1]) // 2, PANEL_Y + 62 + (PREV_H - pv.shape[0]) // 2
+        out[y0:y0 + pv.shape[0], x0:x0 + pv.shape[1]] = pv
+        return out
 
     wav_tmp = out_mp4 + ".audio.wav"
     wavfile.write(wav_tmp, SR, pcm)
@@ -987,9 +1077,10 @@ def render_video(timeline, pcm, out_mp4, book=None):
                 k = max(0, int(np.searchsorted(starts, t, side="right")) - 1)
                 part = parts[k]
                 if k not in bases:
-                    lay = (book or {}).get(id(part["ex"]))
-                    bases[k] = (_compose_book(part["ex"], lay, fonts) if lay
-                                else _compose(part["ex"], fonts))
+                    fr, geo_k, half_k = compose(part["ex"])
+                    if NEXT_UP:
+                        fr = add_panel(fr, following.get((n_take, k)))
+                    bases[k] = (fr, geo_k, half_k)
                 frame, geo, half = bases[k]
                 saved = None
                 if t >= item["play"]:
@@ -1032,7 +1123,6 @@ def render_video(timeline, pcm, out_mp4, book=None):
 def cli():
     global TAP, GRACE, BPM_OVERRIDE, VOICE
     import argparse
-    here = os.path.dirname(os.path.abspath(__file__))
     p = argparse.ArgumentParser(
         description="Make drum rudiment practice audio, a PDF sheet and a notation video "
                     "from the patterns in a rudiments file.",
@@ -1047,8 +1137,8 @@ def cli():
     p.add_argument("output", nargs="?",
                    help="audio file to write; .mp3 is encoded with ffmpeg, anything else is WAV "
                         "(default: rudiments.mp3 if no --sheet or --video is given)")
-    p.add_argument("--rudiments", default=os.path.join(here, "rudiments.txt"), metavar="FILE",
-                   help="pattern file (default: rudiments.txt next to this script)")
+    p.add_argument("--rudiments", default="rudiments.txt", metavar="FILE",
+                   help="pattern file (default: rudiments.txt in the current folder)")
     p.add_argument("--sheet", metavar="OUT.pdf", help="write a PDF practice sheet of the notation")
     p.add_argument("--video", metavar="OUT.mp4",
                    help="write a video of the notation with a cursor following the audio")
@@ -1078,6 +1168,9 @@ def cli():
                         "Lower = louder-sounding accents (default: %(default)s)")
     p.add_argument("--grace", type=float, default=None, metavar="LEVEL",
                    help="volume of flam/drag grace notes, 0-1 (default: about half of --tap)")
+    p.add_argument("--no-next-up", action="store_true",
+                   help="in the video, leave out the 'Next up' preview of the following "
+                        "example (gives the current score more room)")
     p.add_argument("--no-click", action="store_true",
                    help="no metronome click under the examples (count-in still plays)")
     p.add_argument("--voice", metavar="NAME",
@@ -1126,6 +1219,7 @@ def cli():
             elif a.pdf:
                 print(f"using the notation in {a.pdf}", file=sys.stderr)
                 book = book_layouts(a.pdf, chosen, examples)
+            set_layout(not a.no_next_up)
             render_video(timeline, pcm, a.video, book)
 
 if __name__ == "__main__":
